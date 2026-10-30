@@ -35,6 +35,7 @@ from eda import (
     create_attrition_by_years_at_company_chart,
     create_correlation_heatmap,
     create_feature_distribution_chart,
+    apply_enterprise_theme,
     COLORS
 )
 from prediction import get_predictor, AttritionPredictor
@@ -44,7 +45,7 @@ import joblib
 # Streamlit Application Configuration
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="WorkforceIQ | Employee Attrition Intelligence",
+    page_title="WorkforceIQ | Enterprise Attrition Intelligence",
     page_icon="👥",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -131,138 +132,210 @@ def get_cached_model_comparison() -> Dict[str, Any]:
 # Sidebar Navigation & Context
 # ---------------------------------------------------------
 with st.sidebar:
-    st.markdown("### 🏢 **WorkforceIQ**")
-    st.caption("AI-Powered Talent Retention & Attrition Analytics")
-    st.markdown("---")
+    render_html("""
+    <div class="sidebar-brand-box">
+        <div class="sidebar-brand-title">
+            <span class="sidebar-brand-logo">WQ</span>
+            WorkforceIQ
+        </div>
+        <div class="sidebar-brand-sub">
+            AI-Powered Talent Retention &amp; Attrition Analytics
+        </div>
+    </div>
+    """)
     
     page = st.radio(
         "Navigation",
         [
-            "🏠 Home Dashboard",
-            "📊 Exploratory Data Analysis",
-            "💡 Attrition Insights",
-            "⚙️ Model Performance",
-            "🔮 Employee Attrition Prediction",
-            "📋 Business Recommendations",
-            "ℹ️ About Project"
+            "🏠  Home Dashboard",
+            "📊  Exploratory Data Analysis",
+            "💡  Attrition Insights",
+            "⚙️  Model Performance",
+            "🔮  Employee Attrition Prediction",
+            "📋  Business Recommendations",
+            "ℹ️  About Project"
         ],
+        label_visibility="collapsed",
         index=0
     )
     
-    st.markdown("---")
-    
-    # Dataset Quick Stats in Sidebar
+    # Dataset Snapshot Block
     try:
         df_quick = get_cached_dataset()
-        st.markdown("**Dataset Snapshot**")
-        st.write(f"• Headcount: **{len(df_quick):,}**")
-        st.write(f"• Features: **{df_quick.shape[1] - 1}**")
         attr_count = (df_quick[TARGET_COLUMN].str.lower() == 'yes').sum()
-        st.write(f"• Baseline Attrition: **{attr_count / len(df_quick):.1%}**")
+        attr_rate = (attr_count / len(df_quick)) * 100
+        
+        render_html(f"""
+        <div style="margin-top: 20px;">
+            <div class="sidebar-stat-card">
+                <div style="font-size: 0.68rem; color: #94A3B8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">ENTERPRISE DATASET</div>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
+                    <span style="font-size: 1.1rem; font-weight: 700; color: #FFFFFF;">{len(df_quick):,}</span>
+                    <span style="font-size: 0.75rem; color: #93C5FD;">{df_quick.shape[1]-1} Features</span>
+                </div>
+                <div style="font-size: 0.72rem; color: #94A3B8; margin-top: 4px;">
+                    Base Attrition: <span style="color: #F87171; font-weight: 600;">{attr_rate:.1f}%</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-stat-card">
+                <div style="font-size: 0.68rem; color: #94A3B8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">ML ENGINE STATUS</div>
+                <div style="font-size: 0.78rem; color: #34D399; font-weight: 600; display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                    <span style="display:inline-block; width:6px; height:6px; background:#10B981; border-radius:50%;"></span>
+                    Champion Pipeline Active
+                </div>
+            </div>
+        </div>
+        """)
     except Exception:
         pass
         
-    st.markdown("---")
-    st.caption("Developed by **Princeden Thi**\nGitHub: [@princedenthi](https://github.com/princedenthi)")
+    render_html("""
+    <div class="sidebar-footer">
+        <div style="font-weight: 600; color: #CBD5E1; margin-bottom: 2px;">DEVELOPER</div>
+        <div style="color: #94A3B8; font-size: 0.8rem;">Princeden Thi</div>
+        <a href="https://github.com/princedenthi/Employee-Attrition-Prediction" target="_blank" style="color: #60A5FA; text-decoration: none; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px;">
+            <span>↗</span> GitHub Repository
+        </a>
+    </div>
+    """)
 
 
 # ---------------------------------------------------------
 # Page 1: Home Dashboard
 # ---------------------------------------------------------
-if page == "🏠 Home Dashboard":
+if page == "🏠  Home Dashboard":
     render_html("""
-    <div class="brand-header">
-        <h1>WorkforceIQ Executive Dashboard</h1>
-        <p>Strategic HR Intelligence, Attrition Risk Diagnostics & Machine Learning Forecasting</p>
+    <div class="hero-header">
+        <div class="hero-title-area">
+            <h1>Workforce Intelligence Overview</h1>
+            <p>Understand workforce trends, monitor employee retention, and discover actionable HR insights.</p>
+        </div>
+        <div>
+            <span class="hero-badge">
+                <span style="width: 6px; height: 6px; background: #2563EB; border-radius: 50%;"></span>
+                Enterprise Analytics
+            </span>
+        </div>
     </div>
     """)
     
     df = get_cached_dataset()
     metrics = get_eda_summary_metrics(df)
     
-    # Headline KPI Cards
+    # 4 Premium KPI Cards
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         render_html(f"""
-        <div class="kpi-card">
-            <div class="kpi-label">Total Headcount</div>
-            <div class="kpi-val">{metrics['total_employees']:,}</div>
-            <div class="kpi-sub">Active Enterprise Workforce</div>
+        <div class="enterprise-kpi">
+            <div class="kpi-header">
+                <span class="kpi-label">Total Employees</span>
+                <span class="kpi-icon-pill kpi-icon-blue">👥</span>
+            </div>
+            <div class="kpi-value">{metrics['total_employees']:,}</div>
+            <div class="kpi-subtitle">Active workforce headcount</div>
         </div>
         """)
     with col2:
         render_html(f"""
-        <div class="kpi-card" style="border-left: 4px solid #EF4444;">
-            <div class="kpi-label">Voluntary Attrition Rate</div>
-            <div class="kpi-val" style="color: #DC2626;">{metrics['attrition_rate']}%</div>
-            <div class="kpi-sub">{metrics['employees_left']} Departed / {metrics['employees_stayed']} Retained</div>
+        <div class="enterprise-kpi">
+            <div class="kpi-header">
+                <span class="kpi-label">Attrition Rate</span>
+                <span class="kpi-icon-pill kpi-icon-rose">📉</span>
+            </div>
+            <div class="kpi-value" style="color: #DC2626;">{metrics['attrition_rate']}%</div>
+            <div class="kpi-subtitle">{metrics['employees_left']} Departed employees</div>
         </div>
         """)
     with col3:
         render_html(f"""
-        <div class="kpi-card">
-            <div class="kpi-label">Median Monthly Income</div>
-            <div class="kpi-val">${metrics['median_monthly_income']:,.0f}</div>
-            <div class="kpi-sub">Baseline Compensation</div>
+        <div class="enterprise-kpi">
+            <div class="kpi-header">
+                <span class="kpi-label">Employees Retained</span>
+                <span class="kpi-icon-pill kpi-icon-emerald">🛡️</span>
+            </div>
+            <div class="kpi-value" style="color: #059669;">{metrics['employees_stayed']:,}</div>
+            <div class="kpi-subtitle">{metrics['retention_rate']}% Retention stability</div>
         </div>
         """)
     with col4:
         render_html(f"""
-        <div class="kpi-card" style="border-left: 4px solid #F59E0B;">
-            <div class="kpi-label">Overtime Exposure</div>
-            <div class="kpi-val" style="color: #D97706;">{metrics['pct_overtime']}%</div>
-            <div class="kpi-sub">Key Driver of Attrition</div>
+        <div class="enterprise-kpi">
+            <div class="kpi-header">
+                <span class="kpi-label">Average Monthly Income</span>
+                <span class="kpi-icon-pill kpi-icon-indigo">💳</span>
+            </div>
+            <div class="kpi-value">${metrics['avg_monthly_income']:,}</div>
+            <div class="kpi-subtitle">Median: ${metrics['median_monthly_income']:,} / month</div>
         </div>
         """)
 
-    # Executive Overview Visuals
-    c1, c2 = st.columns([1, 1])
-    with c1:
+    # Visual Row 1: Donut Chart & Department-wise Attrition
+    render_html("<div class='section-heading'>Retention Distribution & Departmental Breakdown</div>")
+    r1_col1, r1_col2 = st.columns(2)
+    with r1_col1:
         render_plotly(create_attrition_overview_chart(df))
-    with c2:
+    with r1_col2:
         render_plotly(create_attrition_by_department_chart(df))
 
-    # Executive Summary & Critical Findings
-    render_html("<div class='section-title'>Executive Summary & Strategic Findings</div>")
-    
-    sc1, sc2, sc3 = st.columns(3)
-    with sc1:
-        st.info("""
-        **1. Overtime Burnout Multiplier**  
-        Employees subjected to mandatory overtime exhibit an attrition rate of **30.5%**, compared to only **10.4%** for those without overtime—a **nearly 3x turnover surge**.
-        """)
-    with sc2:
-        st.warning("""
-        **2. Vulnerable Job Roles**  
-        **Sales Representatives (39.8%)** and **Laboratory Technicians (23.9%)** show severe turnover pressure driven by compensation ceilings and demanding travel/bench routines.
-        """)
-    with sc3:
-        st.success("""
-        **3. Early Tenure Fragility**  
-        Over **52%** of all employee exits occur within the first **3 years** of tenure. Targeted onboarding and 18-month career progression pathways dramatically curb early loss.
-        """)
+    # Visual Row 2: Attrition by Job Role & Overtime Impact
+    render_html("<div class='section-heading'>Role Vulnerability & Overtime Impact</div>")
+    r2_col1, r2_col2 = st.columns(2)
+    with r2_col1:
+        render_plotly(create_attrition_by_job_role_chart(df))
+    with r2_col2:
+        render_plotly(create_attrition_by_overtime_chart(df))
 
-    # Architecture Overview Callout
-    with st.expander("🔍 View End-to-End System Architecture"):
-        st.markdown("""
-        - **Data Pipeline**: Ingestion of 1,470 employee records, dropping constant/ID columns, stratified 80/20 train-test split.
-        - **Preprocessing**: Scikit-Learn `ColumnTransformer` (StandardScaler for numerics, OneHotEncoder for categoricals) fit solely on train partition.
-        - **Modeling**: 4 Supervised Classifiers benchmarked (Logistic Regression, Decision Tree, Random Forest, Gradient Boosting) using 5-Fold Stratified Cross-Validation.
-        - **Evaluation**: Optimized specifically for minority positive-class Recall (72.34%) and F1-score (0.5000) to minimize costly false negatives.
-        - **Production Persistence**: Exported as portable Joblib pipelines for instantaneous real-time inference.
-        """)
+    # Visual Row 3: Employee Satisfaction Insights
+    render_html("<div class='section-heading'>Workplace Satisfaction Insights</div>")
+    r3_col1, r3_col2 = st.columns(2)
+    with r3_col1:
+        render_plotly(create_attrition_by_satisfaction_chart(df))
+    with r3_col2:
+        render_plotly(create_attrition_by_work_life_balance_chart(df))
+
+    # Executive Briefing Callout Box
+    render_html("""
+    <div class="content-card" style="margin-top: 10px;">
+        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #2563EB; margin-bottom: 6px;">STRATEGIC EXECUTIVE SUMMARY</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 10px;">
+            <div style="border-left: 3px solid #EF4444; padding-left: 12px;">
+                <strong style="color: #0F172A; font-size: 0.88rem;">1. Overtime Burnout Multiplier</strong>
+                <p style="color: #64748B; font-size: 0.82rem; margin: 3px 0 0 0;">Employees working overtime exhibit a <strong>30.5% attrition rate</strong> vs. <strong>10.4%</strong> without overtime (nearly 3x turnover surge).</p>
+            </div>
+            <div style="border-left: 3px solid #3B82F6; padding-left: 12px;">
+                <strong style="color: #0F172A; font-size: 0.88rem;">2. Highly Vulnerable Roles</strong>
+                <p style="color: #64748B; font-size: 0.82rem; margin: 3px 0 0 0;"><strong>Sales Representatives (39.8%)</strong> and <strong>Lab Technicians (23.9%)</strong> record the highest voluntary churn due to compensation compression.</p>
+            </div>
+            <div style="border-left: 3px solid #10B981; padding-left: 12px;">
+                <strong style="color: #0F172A; font-size: 0.88rem;">3. Early Tenure Retention Cliff</strong>
+                <p style="color: #64748B; font-size: 0.82rem; margin: 3px 0 0 0;">Over <strong>52% of all employee exits</strong> occur within the first 3 years. Targeted onboarding milestones reduce early departures significantly.</p>
+            </div>
+        </div>
+    </div>
+    """)
 
 
 # ---------------------------------------------------------
 # Page 2: Exploratory Data Analysis
 # ---------------------------------------------------------
-elif page == "📊 Exploratory Data Analysis":
-    render_html("<div class='brand-header'><h1>Exploratory Data Analysis (EDA)</h1><p>Interactive multidimensional breakdown of employee demographics, compensation, and satisfaction.</p></div>")
+elif page == "📊  Exploratory Data Analysis":
+    render_html("""
+    <div class="hero-header">
+        <div class="hero-title-area">
+            <h1>Exploratory Data Analysis</h1>
+            <p>Multidimensional breakdown of workforce demographics, compensation, job roles, and tenure.</p>
+        </div>
+        <div>
+            <span class="hero-badge">Interactive Filter Engine</span>
+        </div>
+    </div>
+    """)
     
     df = get_cached_dataset()
     
-    # Subgroup filtering
-    with st.expander("Filter Subgroups", expanded=False):
+    # Subgroup filtering card
+    with st.expander("🔍 Filter Subgroups & Dimensions", expanded=False):
         fcol1, fcol2, fcol3 = st.columns(3)
         with fcol1:
             depts = st.multiselect("Department", options=df['Department'].unique().tolist(), default=df['Department'].unique().tolist())
@@ -282,8 +355,8 @@ elif page == "📊 Exploratory Data Analysis":
         st.stop()
 
     tab1, tab2, tab3, tab4 = st.tabs([
-        "Demographics & Distribution",
-        "Organizational & Roles",
+        "Demographics & Distributions",
+        "Organizational Structure & Roles",
         "Compensation & Tenure",
         "Interactive Feature Explorer"
     ])
@@ -310,7 +383,7 @@ elif page == "📊 Exploratory Data Analysis":
             render_plotly(create_attrition_by_years_at_company_chart(filtered_df))
 
     with tab4:
-        st.markdown("#### Select Any Feature to Analyze Its Relationship with Attrition")
+        st.markdown("#### Select Any Attribute to Inspect Attrition Relationship")
         all_features = [c for c in filtered_df.columns if c != TARGET_COLUMN]
         selected_feat = st.selectbox("Select Feature Column", options=all_features, index=all_features.index('DistanceFromHome') if 'DistanceFromHome' in all_features else 0)
         render_plotly(create_feature_distribution_chart(filtered_df, selected_feat))
@@ -319,8 +392,18 @@ elif page == "📊 Exploratory Data Analysis":
 # ---------------------------------------------------------
 # Page 3: Attrition Insights
 # ---------------------------------------------------------
-elif page == "💡 Attrition Insights":
-    render_html("<div class='brand-header'><h1>Workforce Attrition Root-Cause Insights</h1><p>Deep-dive forensic analytics on workplace friction points, overtime drag, and compensation ceilings.</p></div>")
+elif page == "💡  Attrition Insights":
+    render_html("""
+    <div class="hero-header">
+        <div class="hero-title-area">
+            <h1>Workforce Attrition Root-Cause Insights</h1>
+            <p>Empirical investigation into operational friction points, burnout multipliers, and compensation ceilings.</p>
+        </div>
+        <div>
+            <span class="hero-badge">Diagnostic Analytics</span>
+        </div>
+    </div>
+    """)
     
     df = get_cached_dataset()
     
@@ -340,22 +423,32 @@ elif page == "💡 Attrition Insights":
     with col3:
         st.markdown("### 3. Work-Life Balance Degradation")
         render_plotly(create_attrition_by_work_life_balance_chart(df))
-        st.caption("Employees reporting 'Bad' Work-Life Balance (Level 1) leave at 31.2%, proving that personal boundary disruption drives rapid turnover.")
+        st.caption("Employees reporting 'Bad' Work-Life Balance (Level 1) leave at 31.2%, proving that boundary disruption drives turnover.")
     with col4:
         st.markdown("### 4. High-Attrition Job Roles")
         render_plotly(create_attrition_by_job_role_chart(df))
-        st.caption("Sales Representatives (39.8%) and Laboratory Technicians (23.9%) require urgent intervention and restructured incentive packages.")
+        st.caption("Sales Representatives (39.8%) and Laboratory Technicians (23.9%) require immediate retention interventions.")
 
     st.markdown("---")
-    st.markdown("### 5. Numerical Feature Correlation Matrix with Attrition")
+    st.markdown("### 5. Multi-Feature Correlation Matrix with Attrition")
     render_plotly(create_correlation_heatmap(df, top_n=14))
 
 
 # ---------------------------------------------------------
 # Page 4: Model Performance
 # ---------------------------------------------------------
-elif page == "⚙️ Model Performance":
-    render_html("<div class='brand-header'><h1>Machine Learning Model Benchmarking</h1><p>Comprehensive evaluation of four classification algorithms with class-weight handling and hyperparameter tuning.</p></div>")
+elif page == "⚙️  Model Performance":
+    render_html("""
+    <div class="hero-header">
+        <div class="hero-title-area">
+            <h1>Machine Learning Model Benchmarking</h1>
+            <p>Comprehensive evaluation of four classification algorithms with class-weight handling and hyperparameter tuning.</p>
+        </div>
+        <div>
+            <span class="hero-badge">Scikit-Learn Pipeline</span>
+        </div>
+    </div>
+    """)
     
     comp_data = get_cached_model_comparison()
     
@@ -375,10 +468,14 @@ elif page == "⚙️ Model Performance":
         
     render_dataframe(display_df)
     
-    st.info("""
-    **Model Selection Methodology (Recall & F1 Prioritization):**  
-    In organizational talent retention, a **False Negative** (failing to identify an employee who subsequently resigns) incurs heavy recruiting, onboarding, and productivity costs (estimated at 1.5x–2x annual salary).  
-    Therefore, **Logistic Regression** (with class balancing and L2 regularization) was selected as the optimal production model because it achieved the **highest Recall (72.34%)**, highest **ROC-AUC (79.85%)**, and top **F1-Score (50.00%)**, successfully capturing nearly three-quarters of all departing personnel on the test set.
+    render_html("""
+    <div class="action-card" style="margin-top: 14px;">
+        <div class="action-card-header">Model Selection Methodology (Recall &amp; F1 Prioritization)</div>
+        <div class="action-card-detail">
+            In organizational talent retention, a <strong>False Negative</strong> (failing to identify an employee who subsequently resigns) incurs heavy recruiting, onboarding, and productivity costs (estimated at 1.5x–2x annual salary).<br/>
+            Therefore, <strong>Logistic Regression</strong> (with balanced weights and L2 regularization) was selected as champion because it achieved the <strong>highest Recall (72.34%)</strong>, highest <strong>ROC-AUC (79.85%)</strong>, and top <strong>F1-Score (50.00%)</strong>, capturing nearly three-quarters of all departing personnel on the test set.
+        </div>
+    </div>
     """)
 
     # Interactive Comparison Chart
@@ -391,10 +488,10 @@ elif page == "⚙️ Model Performance":
         y='Score',
         color='Metric',
         barmode='group',
-        color_discrete_sequence=['#1E3A8A', '#0284C7', '#EF4444', '#10B981', '#F59E0B'],
-        title="<b>Algorithm Performance Comparison Across Metrics</b>"
+        color_discrete_sequence=['#2563EB', '#4F46E5', '#EF4444', '#059669', '#D97706']
     )
-    fig_comp.update_layout(template="plotly_white", yaxis_range=[0, 1.0], height=420)
+    apply_enterprise_theme(fig_comp, "Algorithm Performance Comparison Across Metrics", height=400)
+    fig_comp.update_layout(yaxis_range=[0, 1.0])
     render_plotly(fig_comp)
 
     # ROC Curves & Confusion Matrices
@@ -404,7 +501,7 @@ elif page == "⚙️ Model Performance":
     with col_roc:
         st.markdown("### Receiver Operating Characteristic (ROC) Curves")
         fig_roc = go.Figure()
-        colors = ['#1E3A8A', '#EF4444', '#10B981', '#8B5CF6']
+        colors = ['#2563EB', '#EF4444', '#059669', '#4F46E5']
         
         for idx, (m_name, m_info) in enumerate(comp_data['models_data'].items()):
             roc_data = m_info.get('roc_curve', {})
@@ -425,12 +522,10 @@ elif page == "⚙️ Model Performance":
             line=dict(dash='dash', color='#94A3B8')
         ))
         
+        apply_enterprise_theme(fig_roc, "ROC Curves: All Benchmarked Classifiers", height=400)
         fig_roc.update_layout(
-            template="plotly_white",
             xaxis_title="False Positive Rate",
             yaxis_title="True Positive Rate (Recall)",
-            height=420,
-            margin=dict(l=20, r=20, t=30, b=20),
             legend=dict(orientation="h", yanchor="bottom", y=-0.25, xanchor="center", x=0.5)
         )
         render_plotly(fig_roc)
@@ -445,10 +540,9 @@ elif page == "⚙️ Model Performance":
             text_auto=True,
             color_continuous_scale="Blues",
             x=['Predicted: Stay (No)', 'Predicted: Leave (Yes)'],
-            y=['Actual: Stay (No)', 'Actual: Leave (Yes)'],
-            title=f"<b>Confusion Matrix: {chosen_model}</b>"
+            y=['Actual: Stay (No)', 'Actual: Leave (Yes)']
         )
-        fig_cm.update_layout(height=420, margin=dict(l=20, r=20, t=40, b=20))
+        apply_enterprise_theme(fig_cm, f"Confusion Matrix: {chosen_model}", height=400)
         render_plotly(fig_cm)
 
     # Feature Importance Ranking
@@ -467,36 +561,41 @@ elif page == "⚙️ Model Performance":
             y='Feature',
             orientation='h',
             color='Importance',
-            color_continuous_scale='Teal',
-            title="<b>Top 15 Most Predictive Features in Champion Model</b>"
+            color_continuous_scale=[[0, '#93C5FD'], [0.5, '#3B82F6'], [1, '#1E3A8A']]
         )
-        fig_feats.update_layout(template="plotly_white", height=450, margin=dict(l=20, r=20, t=40, b=20))
+        apply_enterprise_theme(fig_feats, "Top 15 Most Predictive Features in Champion Model", height=440)
+        fig_feats.update_layout(coloraxis_showscale=False)
         render_plotly(fig_feats)
 
 
 # ---------------------------------------------------------
 # Page 5: Employee Attrition Prediction
 # ---------------------------------------------------------
-elif page == "🔮 Employee Attrition Prediction":
+elif page == "🔮  Employee Attrition Prediction":
     render_html("""
-    <div class="brand-header">
-        <h1>Individual Employee Attrition Risk Assessment</h1>
-        <p>Interactive risk simulation tool powered by machine learning and explainable feature contributions.</p>
+    <div class="hero-header">
+        <div class="hero-title-area">
+            <h1>Employee Attrition Risk Simulation</h1>
+            <p>Simulate individual retention probability, identify local risk drivers, and prescribe targeted retention actions.</p>
+        </div>
+        <div>
+            <span class="hero-badge">Explainable AI (XAI)</span>
+        </div>
     </div>
     """)
     
     predictor = get_cached_predictor()
 
-    # Presets for quick demonstration
-    st.markdown("#### Test with Realistic Employee Profiles:")
+    # Preset Persona Quick Buttons
+    render_html("<div class='section-heading'>Simulate Realistic Employee Personas</div>")
     p_col1, p_col2, p_col3 = st.columns(3)
     
     preset_choice = None
-    if p_col1.button("🔴 High-Risk Sales Representative"):
+    if p_col1.button("🔴 High-Risk Sales Representative", key="btn_high_risk"):
         preset_choice = 'high_risk'
-    if p_col2.button("🟡 Moderate-Risk Lab Technician"):
+    if p_col2.button("🟡 Moderate-Risk Lab Technician", key="btn_med_risk"):
         preset_choice = 'med_risk'
-    if p_col3.button("🟢 Low-Risk Senior R&D Manager"):
+    if p_col3.button("🟢 Low-Risk Senior R&D Manager", key="btn_low_risk"):
         preset_choice = 'low_risk'
 
     # Set default values based on preset choice
@@ -570,14 +669,14 @@ elif page == "🔮 Employee Attrition Prediction":
             'YearsInCurrentRole': 8
         })
 
-    # Input Form
+    # Input Form wrapped in elegant sections
     with st.form("employee_prediction_form"):
-        st.markdown("### Employee Attributes & Workplace Parameters")
+        render_html("<div class='section-heading'>Employee Attributes &amp; Parameters</div>")
         
         c1, c2, c3 = st.columns(3)
         
         with c1:
-            st.markdown("##### 👤 Demographics & Travel")
+            render_html("<div class='form-section-title'>👤 Demographics &amp; Mobility</div>")
             input_age = st.slider("Age", min_value=18, max_value=60, value=int(default_vals['Age']))
             input_travel = st.selectbox(
                 "Business Travel",
@@ -593,7 +692,7 @@ elif page == "🔮 Employee Attrition Prediction":
             )
             
         with c2:
-            st.markdown("##### 💼 Role & Compensation")
+            render_html("<div class='form-section-title'>💼 Role &amp; Compensation</div>")
             input_dept = st.selectbox(
                 "Department",
                 options=['Sales', 'Research & Development', 'Human Resources'],
@@ -615,7 +714,7 @@ elif page == "🔮 Employee Attrition Prediction":
             input_overtime = st.radio("Mandatory Overtime", options=['No', 'Yes'], index=0 if default_vals['OverTime'] == 'No' else 1, horizontal=True)
 
         with c3:
-            st.markdown("##### ⏱️ Tenure & Satisfaction")
+            render_html("<div class='form-section-title'>⏱️ Tenure &amp; Satisfaction</div>")
             input_sat = st.select_slider(
                 "Job Satisfaction",
                 options=[1, 2, 3, 4],
@@ -657,36 +756,37 @@ elif page == "🔮 Employee Attrition Prediction":
         
         result = predictor.predict(user_record)
         
-        render_html("<div class='section-title'>Assessment Outcome & Risk Analysis</div>")
+        render_html("<div class='section-heading'>Retention Assessment &amp; Risk Diagnostics</div>")
         
         rcol1, rcol2 = st.columns([1, 1.2])
         
         with rcol1:
+            tier_class = f"risk-badge-{result['risk_tier'].lower()[:3]}"
             render_html(f"""
-            <div class="kpi-card" style="border-left: 6px solid {result['risk_color']};">
-                <div class="kpi-label">Predicted Retention Outcome</div>
-                <div class="kpi-val" style="color: {result['risk_color']}; font-size: 2.2rem;">
+            <div class="enterprise-kpi" style="border-left: 5px solid {result['risk_color']};">
+                <div class="kpi-header">
+                    <span class="kpi-label">Retention Classification</span>
+                    <span class="{tier_class}">{result['risk_badge']}</span>
+                </div>
+                <div class="kpi-value" style="color: {result['risk_color']}; font-size: 2.1rem;">
                     {result['attrition_label']}
                 </div>
-                <div style="margin: 8px 0;">
-                    <span class="badge-{result['risk_tier'].lower()[:3]}">{result['risk_badge']}</span>
-                </div>
-                <p style="color: #475569; font-size: 0.95rem; margin-top: 10px;">
+                <p style="color: #475569; font-size: 0.88rem; margin: 8px 0 0 0; line-height: 1.4;">
                     {result['summary_statement']}
                 </p>
             </div>
             """)
             
-            # Gauge chart
+            # Clean Modern Gauge Chart
             fig_gauge = go.Figure(go.Indicator(
                 mode="gauge+number",
                 value=result['probability_pct'],
                 domain={'x': [0, 1], 'y': [0, 1]},
-                title={'text': "<b>Attrition Risk Score (%)</b>", 'font': {'size': 16}},
-                number={'suffix': "%", 'font': {'size': 32}},
+                title={'text': "<b>Attrition Risk Score (%)</b>", 'font': {'size': 14, 'color': '#0F172A', 'family': 'Inter'}},
+                number={'suffix': "%", 'font': {'size': 32, 'family': 'Inter', 'color': result['risk_color']}},
                 gauge={
-                    'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "#94A3B8"},
-                    'bar': {'color': result['risk_color'], 'thickness': 0.3},
+                    'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "#CBD5E1"},
+                    'bar': {'color': result['risk_color'], 'thickness': 0.28},
                     'bgcolor': "white",
                     'borderwidth': 1,
                     'bordercolor': "#E2E8F0",
@@ -696,13 +796,17 @@ elif page == "🔮 Employee Attrition Prediction":
                         {'range': [60, 100], 'color': '#FEF2F2'}
                     ],
                     'threshold': {
-                        'line': {'color': "black", 'width': 3},
+                        'line': {'color': "#0F172A", 'width': 3},
                         'thickness': 0.75,
                         'value': result['probability_pct']
                     }
                 }
             ))
-            fig_gauge.update_layout(height=260, margin=dict(l=20, r=20, t=30, b=20))
+            fig_gauge.update_layout(
+                paper_bgcolor="rgba(255,255,255,1)",
+                height=260,
+                margin=dict(l=20, r=20, t=30, b=20)
+            )
             render_plotly(fig_gauge)
 
         with rcol2:
@@ -721,21 +825,24 @@ elif page == "🔮 Employee Attrition Prediction":
                     y='feature',
                     orientation='h',
                     color='direction',
-                    color_discrete_map={'Increases Risk': '#EF4444', 'Reduces Risk': '#10B981'},
-                    title="<b>Local Feature Impact on Attrition Decision</b>"
+                    color_discrete_map={'Increases Risk': '#EF4444', 'Reduces Risk': '#2563EB'}
                 )
-                fig_c.update_layout(template="plotly_white", height=340, margin=dict(l=20, r=20, t=40, b=20))
+                apply_enterprise_theme(fig_c, "Local Feature Attribution on Prediction", height=340)
+                fig_c.update_layout(
+                    xaxis_title="Attribution Impact (Log-Odds)",
+                    yaxis_title=""
+                )
                 render_plotly(fig_c)
             else:
                 st.info("Feature contributions calculated.")
 
         # Tailored Action Plan
-        render_html("<div class='section-title'>Recommended HR Mitigation Strategies</div>")
+        render_html("<div class='section-heading'>Recommended HR Mitigation Interventions</div>")
         for rec in result['recommendations']:
             render_html(f"""
-            <div class="callout-box">
-                <strong style="color: #1E3A8A;">[{rec['category']}] {rec['action']}</strong><br>
-                <span style="color: #334155; font-size: 0.92rem;">{rec['detail']}</span>
+            <div class="action-card">
+                <div class="action-card-header">[{rec['category']}] {rec['action']}</div>
+                <div class="action-card-detail">{rec['detail']}</div>
             </div>
             """)
 
@@ -746,11 +853,16 @@ elif page == "🔮 Employee Attrition Prediction":
 # ---------------------------------------------------------
 # Page 6: Business Recommendations
 # ---------------------------------------------------------
-elif page == "📋 Business Recommendations":
+elif page == "📋  Business Recommendations":
     render_html("""
-    <div class="brand-header">
-        <h1>Executive Talent Retention Playbook</h1>
-        <p>MBA-level strategic interventions and organizational policy reforms derived from empirical findings.</p>
+    <div class="hero-header">
+        <div class="hero-title-area">
+            <h1>Executive Talent Retention Playbook</h1>
+            <p>Strategic interventions, compensation restructuring, and organizational policy reforms derived from empirical findings.</p>
+        </div>
+        <div>
+            <span class="hero-badge">MBA Strategic Framework</span>
+        </div>
     </div>
     """)
     
@@ -758,45 +870,53 @@ elif page == "📋 Business Recommendations":
     
     col1, col2 = st.columns(2)
     with col1:
-        st.markdown("""
-        #### 1. Overtime Governance & Workload Rebalancing
-        - **Problem**: 30.5% attrition among overtime personnel vs 10.4% baseline.
-        - **Policy Intervention**:
-          - Mandate maximum weekly overtime caps (e.g. 8 hours/week maximum).
-          - Provide 1.5x compensatory time-off or spot equity bonuses for crunch periods.
-          - Implement automated workload monitoring to detect recurring team deficits.
-        - **Target Outcome**: Reduce voluntary churn among technical staff by 35%.
-        """)
+        render_html("""
+        <div class="content-card">
+            <div style="font-size: 0.75rem; font-weight: 700; color: #2563EB; text-transform: uppercase; margin-bottom: 4px;">PILLAR 1</div>
+            <h4 style="margin: 0 0 8px 0; color: #0F172A;">Overtime Governance &amp; Workload Rebalancing</h4>
+            <p style="color: #64748B; font-size: 0.84rem; margin-bottom: 8px;"><strong>Problem:</strong> 30.5% attrition among overtime personnel vs 10.4% baseline.</p>
+            <ul style="color: #475569; font-size: 0.84rem; padding-left: 18px; margin: 0;">
+                <li>Mandate maximum weekly overtime caps (e.g. 8 hours/week maximum).</li>
+                <li>Provide 1.5x compensatory time-off or spot equity bonuses for crunch periods.</li>
+                <li>Implement automated workload monitoring to detect recurring team deficits.</li>
+            </ul>
+        </div>
         
-        st.markdown("""
-        #### 2. Compensation Realignment for Vulnerable Roles
-        - **Problem**: Sales Representatives leave at 39.8%, driven by base pay compression.
-        - **Policy Intervention**:
-          - Shift compensation structures toward a higher guaranteed base salary (65/35 ratio).
-          - Introduce milestone-based quarterly commission acceleration.
-          - Conduct bi-annual market salary benchmarking for lab technicians.
-        - **Target Outcome**: Enhance sales force tenure by an average of 1.8 years.
+        <div class="content-card">
+            <div style="font-size: 0.75rem; font-weight: 700; color: #2563EB; text-transform: uppercase; margin-bottom: 4px;">PILLAR 2</div>
+            <h4 style="margin: 0 0 8px 0; color: #0F172A;">Compensation Realignment for Vulnerable Roles</h4>
+            <p style="color: #64748B; font-size: 0.84rem; margin-bottom: 8px;"><strong>Problem:</strong> Sales Representatives leave at 39.8%, driven by base pay compression.</p>
+            <ul style="color: #475569; font-size: 0.84rem; padding-left: 18px; margin: 0;">
+                <li>Shift compensation structures toward a higher guaranteed base salary (65/35 ratio).</li>
+                <li>Introduce milestone-based quarterly commission acceleration.</li>
+                <li>Conduct bi-annual market salary benchmarking for lab technicians.</li>
+            </ul>
+        </div>
         """)
         
     with col2:
-        st.markdown("""
-        #### 3. Career Pathing & Promotion Cadence
-        - **Problem**: Employees in role > 3 years without promotion show a 40% jump in departure likelihood.
-        - **Policy Intervention**:
-          - Institute transparent 18-month career progression milestones.
-          - Introduce "Dual Ladder" technical track for individual contributors wanting advancement without management overhead.
-          - Formalize sponsorship and executive mentorship matching programs.
-        - **Target Outcome**: Cut mid-career talent flight by 25%.
-        """)
+        render_html("""
+        <div class="content-card">
+            <div style="font-size: 0.75rem; font-weight: 700; color: #2563EB; text-transform: uppercase; margin-bottom: 4px;">PILLAR 3</div>
+            <h4 style="margin: 0 0 8px 0; color: #0F172A;">Career Pathing &amp; Promotion Cadence</h4>
+            <p style="color: #64748B; font-size: 0.84rem; margin-bottom: 8px;"><strong>Problem:</strong> Employees in role &gt; 3 years without promotion show a 40% jump in departures.</p>
+            <ul style="color: #475569; font-size: 0.84rem; padding-left: 18px; margin: 0;">
+                <li>Institute transparent 18-month career progression milestones.</li>
+                <li>Introduce "Dual Ladder" technical track for individual contributors wanting advancement without management overhead.</li>
+                <li>Formalize sponsorship and executive mentorship matching programs.</li>
+            </ul>
+        </div>
         
-        st.markdown("""
-        #### 4. Hybrid Flexibility & Commute Mitigation
-        - **Problem**: Commute distances > 15 miles double employee dissatisfaction scores.
-        - **Policy Intervention**:
-          - Authorize 2–3 remote work days per week for eligible engineering and R&D roles.
-          - Offer transit subsidies or rideshare credits.
-          - Create core asynchronous hours (10:00 AM – 3:00 PM) to bypass rush hours.
-        - **Target Outcome**: Boost employee work-life balance scores from 2.1 to 3.4.
+        <div class="content-card">
+            <div style="font-size: 0.75rem; font-weight: 700; color: #2563EB; text-transform: uppercase; margin-bottom: 4px;">PILLAR 4</div>
+            <h4 style="margin: 0 0 8px 0; color: #0F172A;">Hybrid Flexibility &amp; Commute Mitigation</h4>
+            <p style="color: #64748B; font-size: 0.84rem; margin-bottom: 8px;"><strong>Problem:</strong> Commute distances &gt; 15 miles double employee dissatisfaction scores.</p>
+            <ul style="color: #475569; font-size: 0.84rem; padding-left: 18px; margin: 0;">
+                <li>Authorize 2–3 remote work days per week for eligible engineering and R&amp;D roles.</li>
+                <li>Offer transit subsidies or rideshare credits.</li>
+                <li>Create core asynchronous hours (10:00 AM – 3:00 PM) to bypass rush hours.</li>
+            </ul>
+        </div>
         """)
 
     st.markdown("---")
@@ -824,20 +944,29 @@ elif page == "📋 Business Recommendations":
     saved_departures = int(departures_yr * (target_reduction / 100.0))
     net_savings = saved_departures * cost_per_departure
 
-    render_html(f"""
-    <div style="display: flex; gap: 16px; margin-top: 14px;">
-        <div class="kpi-card" style="border-left: 4px solid #EF4444; flex: 1;">
-            <div class="kpi-label">Annual Turnover Cost</div>
-            <div class="kpi-val" style="color: #DC2626;">${total_turnover_cost:,.0f}</div>
-            <div class="kpi-sub">{departures_yr:,} annual departures @ ${cost_per_departure:,.0f} each</div>
+    r_col1, r_col2 = st.columns(2)
+    with r_col1:
+        render_html(f"""
+        <div class="enterprise-kpi" style="border-left: 5px solid #EF4444;">
+            <div class="kpi-header">
+                <span class="kpi-label">Annual Turnover Cost</span>
+                <span class="kpi-icon-pill kpi-icon-rose">💸</span>
+            </div>
+            <div class="kpi-value" style="color: #DC2626;">${total_turnover_cost:,.0f}</div>
+            <div class="kpi-subtitle">{departures_yr:,} annual departures @ ${cost_per_departure:,.0f} each</div>
         </div>
-        <div class="kpi-card" style="border-left: 4px solid #10B981; flex: 1;">
-            <div class="kpi-label">Projected Annual Savings</div>
-            <div class="kpi-val" style="color: #059669;">${net_savings:,.0f}</div>
-            <div class="kpi-sub">Preserving {saved_departures:,} high-performing employees annually</div>
+        """)
+    with r_col2:
+        render_html(f"""
+        <div class="enterprise-kpi" style="border-left: 5px solid #059669;">
+            <div class="kpi-header">
+                <span class="kpi-label">Projected Annual Savings</span>
+                <span class="kpi-icon-pill kpi-icon-emerald">📈</span>
+            </div>
+            <div class="kpi-value" style="color: #059669;">${net_savings:,.0f}</div>
+            <div class="kpi-subtitle">Preserving {saved_departures:,} high-performing employees annually</div>
         </div>
-    </div>
-    """)
+        """)
 
     st.markdown("---")
     st.markdown("### Priority Implementation Matrix (Impact vs. Effort)")
@@ -855,11 +984,16 @@ elif page == "📋 Business Recommendations":
 # ---------------------------------------------------------
 # Page 7: About Project
 # ---------------------------------------------------------
-elif page == "ℹ️ About Project":
+elif page == "ℹ️  About Project":
     render_html("""
-    <div class="brand-header">
-        <h1>About the WorkforceIQ Project</h1>
-        <p>A comprehensive Machine Learning & Business Intelligence solution for enterprise human resource retention.</p>
+    <div class="hero-header">
+        <div class="hero-title-area">
+            <h1>About WorkforceIQ</h1>
+            <p>An enterprise machine learning & human capital analytics system for organizational retention.</p>
+        </div>
+        <div>
+            <span class="hero-badge">Production v2.0</span>
+        </div>
     </div>
     """)
     

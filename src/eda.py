@@ -1,9 +1,9 @@
 """
 eda.py
 ------
-Exploratory Data Analysis (EDA) module using Plotly for interactive visualizations.
-Generates comprehensive visual analytics on demographics, compensation, job roles,
-workplace satisfaction, and attrition drivers.
+Exploratory Data Analysis (EDA) module using Plotly for enterprise-grade visualizations.
+Generates refined, Tableau/Power BI inspired visual analytics on demographics,
+compensation, job roles, workplace satisfaction, and attrition drivers.
 """
 
 from typing import Dict, Any, List, Optional
@@ -11,24 +11,71 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 from data_preprocessing import load_data, clean_data, TARGET_COLUMN
 
-
-# Corporate Color Palette
+# Enterprise SaaS Color Palette (Linear / Stripe / Tableau Inspired)
 COLORS = {
-    'primary': '#1E3A8A',       # Deep Navy
-    'secondary': '#0284C7',     # Bright Cyan/Sky
-    'accent_red': '#EF4444',    # Crimson Red (Attrition = Yes)
-    'accent_green': '#10B981',  # Emerald Green (Attrition = No)
-    'neutral_light': '#F8FAFC', # Slate Light
-    'neutral_dark': '#1E293B',  # Slate Dark
-    'amber': '#F59E0B',         # Warning Amber
-    'purple': '#8B5CF6'         # Royal Purple
+    'primary_blue': '#2563EB',    # Royal Blue
+    'indigo': '#4F46E5',          # Deep Indigo
+    'sky': '#0284C7',             # Clean Sky Blue
+    'emerald': '#059669',         # Enterprise Emerald (Stayed)
+    'rose': '#EF4444',            # Clean Coral Red (Attrition)
+    'slate_dark': '#0F172A',      # Typography Primary
+    'slate_muted': '#64748B',     # Typography Secondary
+    'border': '#E2E8F0',          # Subtle Card Borders
+    'grid': '#F1F5F9',            # Minimal Plotly Grid
+    'card_bg': '#FFFFFF'          # Clean Card Canvas
 }
 
-ATTRITION_COLORS = {'Yes': COLORS['accent_red'], 'No': COLORS['accent_green']}
+ATTRITION_COLORS = {'Yes': COLORS['rose'], 'No': COLORS['primary_blue']}
+ATTRITION_STATUS_COLORS = {'Stayed (No)': COLORS['primary_blue'], 'Departed (Yes)': COLORS['rose']}
+
+
+def apply_enterprise_theme(fig: go.Figure, title: str = "", height: int = 380) -> go.Figure:
+    """Applies a clean, modern Tableau/SaaS aesthetic to any Plotly figure."""
+    fig.update_layout(
+        title={
+            'text': f"<b>{title}</b>" if title else "",
+            'font': {'family': 'Inter, -apple-system, sans-serif', 'size': 14, 'color': COLORS['slate_dark']},
+            'x': 0.02,
+            'xanchor': 'left'
+        },
+        font=dict(family="Inter, -apple-system, sans-serif", size=11, color=COLORS['slate_muted']),
+        paper_bgcolor="rgba(255,255,255,1)",
+        plot_bgcolor="rgba(255,255,255,1)",
+        height=height,
+        hoverlabel=dict(
+            bgcolor=COLORS['slate_dark'],
+            font_size=12,
+            font_family="Inter, -apple-system, sans-serif",
+            font_color="#FFFFFF",
+            bordercolor=COLORS['slate_dark']
+        ),
+        xaxis=dict(
+            showgrid=False,
+            zeroline=False,
+            linecolor=COLORS['border'],
+            tickfont=dict(size=11, color=COLORS['slate_muted'])
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridcolor=COLORS['grid'],
+            zeroline=False,
+            linecolor=COLORS['border'],
+            tickfont=dict(size=11, color=COLORS['slate_muted'])
+        ),
+        margin=dict(l=24, r=24, t=48, b=24),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1,
+            font=dict(size=11, color=COLORS['slate_muted'])
+        )
+    )
+    return fig
 
 
 def get_eda_summary_metrics(df: pd.DataFrame) -> Dict[str, Any]:
@@ -42,62 +89,62 @@ def get_eda_summary_metrics(df: pd.DataFrame) -> Dict[str, Any]:
         'total_employees': total,
         'employees_left': left,
         'employees_stayed': stayed,
-        'attrition_rate': round(rate, 2),
+        'attrition_rate': round(rate, 1),
+        'retention_rate': round(100.0 - rate, 1),
         'avg_age': round(df['Age'].mean(), 1) if 'Age' in df else 0,
-        'median_monthly_income': round(df['MonthlyIncome'].median(), 0) if 'MonthlyIncome' in df else 0,
+        'avg_monthly_income': int(round(df['MonthlyIncome'].mean())) if 'MonthlyIncome' in df else 0,
+        'median_monthly_income': int(round(df['MonthlyIncome'].median())) if 'MonthlyIncome' in df else 0,
         'avg_years_at_company': round(df['YearsAtCompany'].mean(), 1) if 'YearsAtCompany' in df else 0,
         'pct_overtime': round((df['OverTime'] == 'Yes').mean() * 100, 1) if 'OverTime' in df else 0
     }
 
 
 def create_attrition_overview_chart(df: pd.DataFrame) -> go.Figure:
-    """Donut chart showing overall headcount split by Attrition status."""
+    """Enterprise donut chart showing overall headcount split with central KPI."""
     counts = df[TARGET_COLUMN].value_counts()
     labels = counts.index.tolist()
     values = counts.values.tolist()
     
     colors = [ATTRITION_COLORS.get(label, '#94A3B8') for label in labels]
+    attr_rate = (counts.get('Yes', 0) / len(df) * 100) if len(df) > 0 else 0
     
     fig = go.Figure(data=[go.Pie(
-        labels=labels,
+        labels=['Departed (Yes)' if l == 'Yes' else 'Retained (No)' for l in labels],
         values=values,
-        hole=0.55,
-        marker=dict(colors=colors, line=dict(color='#FFFFFF', width=2)),
-        textinfo='label+percent+value',
-        hovertemplate="<b>%{label}</b><br>Count: %{value}<br>Share: %{percent}<extra></extra>"
+        hole=0.68,
+        marker=dict(colors=colors, line=dict(color='#FFFFFF', width=3)),
+        textinfo='percent',
+        textposition='outside',
+        hovertemplate="<b>%{label}</b><br>Count: %{value:,}<br>Share: %{percent}<extra></extra>"
     )])
     
+    fig.add_annotation(
+        text=f"<span style='font-size:24px;font-weight:700;color:{COLORS['slate_dark']}'>{attr_rate:.1f}%</span><br><span style='font-size:11px;color:{COLORS['slate_muted']};font-weight:600;'>ATTRITION RATE</span>",
+        x=0.5, y=0.5, showarrow=False, align="center"
+    )
+    
+    apply_enterprise_theme(fig, "Workforce Headcount & Retention Overview", height=360)
     fig.update_layout(
-        title="<b>Workforce Attrition Overview</b>",
-        font=dict(family="Inter, sans-serif"),
-        template="plotly_white",
-        height=380,
-        margin=dict(l=20, r=20, t=50, b=20),
-        legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5)
+        showlegend=True,
+        legend=dict(orientation="h", yanchor="bottom", y=-0.12, xanchor="center", x=0.5)
     )
     return fig
 
 
 def create_attrition_by_age_chart(df: pd.DataFrame) -> go.Figure:
-    """Age distribution split by Attrition."""
+    """Age distribution split by Attrition with smooth overlay."""
     fig = px.histogram(
         df,
         x="Age",
         color=TARGET_COLUMN,
         barmode="overlay",
-        nbins=25,
+        nbins=24,
         color_discrete_map=ATTRITION_COLORS,
-        opacity=0.75,
-        labels={TARGET_COLUMN: "Attrition", "Age": "Employee Age (Years)"},
-        title="<b>Age Distribution by Attrition Status</b>"
+        opacity=0.72,
+        labels={TARGET_COLUMN: "Status", "Age": "Employee Age (Years)"}
     )
-    fig.update_layout(
-        template="plotly_white",
-        font=dict(family="Inter, sans-serif"),
-        height=380,
-        margin=dict(l=20, r=20, t=50, b=20),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-    )
+    apply_enterprise_theme(fig, "Age Distribution by Attrition Status", height=360)
+    fig.update_layout(xaxis_title="Age (Years)", yaxis_title="Employee Count")
     return fig
 
 
@@ -115,43 +162,35 @@ def create_attrition_by_gender_chart(df: pd.DataFrame) -> go.Figure:
         color=TARGET_COLUMN,
         barmode="group",
         color_discrete_map=ATTRITION_COLORS,
-        text=agg.apply(lambda r: f"{r['Count']} ({r['Rate']}%)", axis=1),
-        title="<b>Attrition Headcount & Proportions by Gender</b>"
+        text=agg.apply(lambda r: f"{r['Count']} ({r['Rate']}%)", axis=1)
     )
-    fig.update_traces(textposition='outside')
-    fig.update_layout(
-        template="plotly_white",
-        font=dict(family="Inter, sans-serif"),
-        height=380,
-        margin=dict(l=20, r=20, t=50, b=20),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-    )
+    fig.update_traces(textposition='outside', marker_line_width=0)
+    apply_enterprise_theme(fig, "Attrition Headcount by Gender", height=360)
+    fig.update_layout(yaxis_title="Employee Count", xaxis_title="")
     return fig
 
 
 def create_attrition_by_department_chart(df: pd.DataFrame) -> go.Figure:
-    """Department-wise attrition count and percentage."""
+    """Department-wise attrition rate comparison."""
     dept_agg = df.groupby(['Department', TARGET_COLUMN]).size().unstack(fill_value=0)
-    dept_agg['Total'] = dept_agg['No'] + dept_agg['Yes']
-    dept_agg['Attrition_Rate_%'] = (dept_agg['Yes'] / dept_agg['Total'] * 100).round(1)
-    dept_agg = dept_agg.reset_index()
+    dept_agg['Total'] = dept_agg.get('No', 0) + dept_agg.get('Yes', 0)
+    dept_agg['Attrition_Rate_%'] = (dept_agg.get('Yes', 0) / dept_agg['Total'] * 100).round(1)
+    dept_agg = dept_agg.reset_index().sort_values(by='Attrition_Rate_%', ascending=False)
 
     fig = px.bar(
         dept_agg,
         x="Department",
         y="Attrition_Rate_%",
         color="Attrition_Rate_%",
-        color_continuous_scale="Reds",
-        text=dept_agg["Attrition_Rate_%"].apply(lambda v: f"{v}%"),
-        title="<b>Attrition Rate (%) by Department</b>"
+        color_continuous_scale=[[0, '#93C5FD'], [0.5, '#3B82F6'], [1, '#EF4444']],
+        text=dept_agg["Attrition_Rate_%"].apply(lambda v: f"{v}%")
     )
-    fig.update_traces(textposition='outside')
+    fig.update_traces(textposition='outside', marker_line_width=0)
+    apply_enterprise_theme(fig, "Attrition Rate (%) by Department", height=360)
     fig.update_layout(
-        template="plotly_white",
-        font=dict(family="Inter, sans-serif"),
         yaxis_title="Attrition Rate (%)",
-        height=380,
-        margin=dict(l=20, r=20, t=50, b=20)
+        xaxis_title="",
+        coloraxis_showscale=False
     )
     return fig
 
@@ -169,40 +208,34 @@ def create_attrition_by_job_role_chart(df: pd.DataFrame) -> go.Figure:
         y="JobRole",
         orientation="h",
         color="Rate",
-        color_continuous_scale="OrRd",
-        text=role_agg.apply(lambda r: f"{r['Rate']}% ({r.get('Yes', 0)}/{r['Total']})", axis=1),
-        title="<b>Attrition Rate (%) Ranked by Job Role</b>"
+        color_continuous_scale=[[0, '#93C5FD'], [0.4, '#3B82F6'], [1, '#EF4444']],
+        text=role_agg.apply(lambda r: f"{r['Rate']}%  ({r.get('Yes', 0)}/{r['Total']})", axis=1)
     )
-    fig.update_traces(textposition='outside')
+    fig.update_traces(textposition='outside', marker_line_width=0)
+    apply_enterprise_theme(fig, "Attrition Risk Ranking by Job Role", height=420)
     fig.update_layout(
-        template="plotly_white",
-        font=dict(family="Inter, sans-serif"),
         xaxis_title="Attrition Rate (%)",
         yaxis_title="",
-        height=450,
-        margin=dict(l=20, r=40, t=50, b=20)
+        coloraxis_showscale=False,
+        margin=dict(l=20, r=45, t=48, b=24)
     )
     return fig
 
 
 def create_attrition_by_income_chart(df: pd.DataFrame) -> go.Figure:
-    """Box plot of Monthly Income comparison."""
+    """Clean box plot of Monthly Income comparison."""
     fig = px.box(
         df,
         x=TARGET_COLUMN,
         y="MonthlyIncome",
         color=TARGET_COLUMN,
         color_discrete_map=ATTRITION_COLORS,
-        points="outliers",
-        title="<b>Monthly Income Distribution by Attrition Status</b>"
+        points="outliers"
     )
+    apply_enterprise_theme(fig, "Monthly Income Distribution by Attrition", height=360)
     fig.update_layout(
-        template="plotly_white",
-        font=dict(family="Inter, sans-serif"),
         yaxis_title="Monthly Income ($)",
-        xaxis_title="Attrition",
-        height=380,
-        margin=dict(l=20, r=20, t=50, b=20),
+        xaxis_title="Attrition Status",
         showlegend=False
     )
     return fig
@@ -220,25 +253,21 @@ def create_attrition_by_overtime_chart(df: pd.DataFrame) -> go.Figure:
         x="OverTime",
         y="Rate",
         color="OverTime",
-        color_discrete_map={'Yes': COLORS['accent_red'], 'No': COLORS['secondary']},
-        text=ot_agg['Rate'].apply(lambda v: f"{v}% Attrition"),
-        title="<b>Impact of Overtime on Employee Turnover</b>"
+        color_discrete_map={'Yes': COLORS['rose'], 'No': COLORS['primary_blue']},
+        text=ot_agg['Rate'].apply(lambda v: f"{v}% Attrition")
     )
-    fig.update_traces(textposition='outside')
+    fig.update_traces(textposition='outside', marker_line_width=0)
+    apply_enterprise_theme(fig, "Impact of Overtime on Turnover Rate", height=360)
     fig.update_layout(
-        template="plotly_white",
-        font=dict(family="Inter, sans-serif"),
         yaxis_title="Attrition Rate (%)",
-        xaxis_title="Overtime Mandatory / Active",
-        height=380,
-        margin=dict(l=20, r=20, t=50, b=20),
+        xaxis_title="Mandatory / Regular Overtime",
         showlegend=False
     )
     return fig
 
 
 def create_attrition_by_satisfaction_chart(df: pd.DataFrame) -> go.Figure:
-    """Attrition rate across Job Satisfaction levels (1: Low to 4: Very High)."""
+    """Attrition rate across Job Satisfaction levels."""
     sat_labels = {1: '1 - Low', 2: '2 - Medium', 3: '3 - High', 4: '4 - Very High'}
     df_copy = df.copy()
     df_copy['Satisfaction_Label'] = df_copy['JobSatisfaction'].map(sat_labels)
@@ -253,24 +282,21 @@ def create_attrition_by_satisfaction_chart(df: pd.DataFrame) -> go.Figure:
         x="Satisfaction_Label",
         y="Rate",
         color="Rate",
-        color_continuous_scale="Blues_r",
-        text=sat_agg['Rate'].apply(lambda v: f"{v}%"),
-        title="<b>Attrition Rate by Job Satisfaction Score</b>"
+        color_continuous_scale=[[0, '#93C5FD'], [0.5, '#3B82F6'], [1, '#EF4444']],
+        text=sat_agg['Rate'].apply(lambda v: f"{v}%")
     )
-    fig.update_traces(textposition='outside')
+    fig.update_traces(textposition='outside', marker_line_width=0)
+    apply_enterprise_theme(fig, "Attrition Rate by Job Satisfaction Score", height=360)
     fig.update_layout(
-        template="plotly_white",
-        font=dict(family="Inter, sans-serif"),
         yaxis_title="Attrition Rate (%)",
-        xaxis_title="Job Satisfaction Score",
-        height=380,
-        margin=dict(l=20, r=20, t=50, b=20)
+        xaxis_title="Job Satisfaction Rating",
+        coloraxis_showscale=False
     )
     return fig
 
 
 def create_attrition_by_work_life_balance_chart(df: pd.DataFrame) -> go.Figure:
-    """Attrition rate across Work-Life Balance levels (1: Bad to 4: Best)."""
+    """Attrition rate across Work-Life Balance levels."""
     wlb_labels = {1: '1 - Bad', 2: '2 - Good', 3: '3 - Better', 4: '4 - Best'}
     df_copy = df.copy()
     df_copy['WLB_Label'] = df_copy['WorkLifeBalance'].map(wlb_labels)
@@ -285,18 +311,15 @@ def create_attrition_by_work_life_balance_chart(df: pd.DataFrame) -> go.Figure:
         x="WLB_Label",
         y="Rate",
         color="Rate",
-        color_continuous_scale="Purples_r",
-        text=wlb_agg['Rate'].apply(lambda v: f"{v}%"),
-        title="<b>Attrition Rate by Work-Life Balance Rating</b>"
+        color_continuous_scale=[[0, '#A78BFA'], [0.5, '#6366F1'], [1, '#EF4444']],
+        text=wlb_agg['Rate'].apply(lambda v: f"{v}%")
     )
-    fig.update_traces(textposition='outside')
+    fig.update_traces(textposition='outside', marker_line_width=0)
+    apply_enterprise_theme(fig, "Attrition Rate by Work-Life Balance Rating", height=360)
     fig.update_layout(
-        template="plotly_white",
-        font=dict(family="Inter, sans-serif"),
         yaxis_title="Attrition Rate (%)",
-        xaxis_title="Work-Life Balance Score",
-        height=380,
-        margin=dict(l=20, r=20, t=50, b=20)
+        xaxis_title="Work-Life Balance Rating",
+        coloraxis_showscale=False
     )
     return fig
 
@@ -308,31 +331,24 @@ def create_attrition_by_years_at_company_chart(df: pd.DataFrame) -> go.Figure:
         x="YearsAtCompany",
         color=TARGET_COLUMN,
         barmode="group",
-        nbins=20,
-        color_discrete_map=ATTRITION_COLORS,
-        title="<b>Attrition Distribution across Tenure (Years at Company)</b>"
+        nbins=18,
+        color_discrete_map=ATTRITION_COLORS
     )
+    apply_enterprise_theme(fig, "Attrition Headcount across Tenure (Years at Company)", height=360)
     fig.update_layout(
-        template="plotly_white",
-        font=dict(family="Inter, sans-serif"),
         xaxis_title="Years at Company",
-        yaxis_title="Employee Count",
-        height=380,
-        margin=dict(l=20, r=20, t=50, b=20),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        yaxis_title="Employee Count"
     )
     return fig
 
 
-def create_correlation_heatmap(df: pd.DataFrame, top_n: int = 15) -> go.Figure:
-    """Interactive correlation heatmap for key numerical variables with Attrition."""
+def create_correlation_heatmap(df: pd.DataFrame, top_n: int = 14) -> go.Figure:
+    """Clean correlation heatmap with minimal visual noise."""
     df_clean = clean_data(df)
     df_corr = df_clean.copy()
     df_corr['Attrition_Numeric'] = df_corr[TARGET_COLUMN].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
     
     num_cols = df_corr.select_dtypes(include=['int64', 'float64']).columns.tolist()
-    
-    # Sort features by absolute correlation with Attrition
     corrs_with_target = df_corr[num_cols].corr()['Attrition_Numeric'].abs().sort_values(ascending=False)
     selected_cols = corrs_with_target.head(top_n).index.tolist()
     
@@ -342,21 +358,16 @@ def create_correlation_heatmap(df: pd.DataFrame, top_n: int = 15) -> go.Figure:
         corr_matrix,
         text_auto=True,
         aspect="auto",
-        color_continuous_scale="RdBu_r",
+        color_continuous_scale="Blues",
         zmin=-1,
-        zmax=1,
-        title=f"<b>Correlation Heatmap (Top {top_n} Factors Correlated with Attrition)</b>"
+        zmax=1
     )
-    fig.update_layout(
-        font=dict(family="Inter, sans-serif"),
-        height=520,
-        margin=dict(l=20, r=20, t=50, b=20)
-    )
+    apply_enterprise_theme(fig, f"Correlation Matrix (Top {top_n} Factors Correlated with Attrition)", height=480)
     return fig
 
 
 def create_feature_distribution_chart(df: pd.DataFrame, feature_col: str) -> go.Figure:
-    """Distribution chart for any chosen numeric or categorical feature."""
+    """Distribution chart for any selected feature."""
     if feature_col not in df.columns:
         raise ValueError(f"Feature '{feature_col}' not in dataset.")
         
@@ -368,8 +379,7 @@ def create_feature_distribution_chart(df: pd.DataFrame, feature_col: str) -> go.
             marginal="box",
             barmode="overlay",
             color_discrete_map=ATTRITION_COLORS,
-            opacity=0.75,
-            title=f"<b>Distribution of {feature_col} by Attrition</b>"
+            opacity=0.75
         )
     else:
         fig = px.histogram(
@@ -377,14 +387,7 @@ def create_feature_distribution_chart(df: pd.DataFrame, feature_col: str) -> go.
             x=feature_col,
             color=TARGET_COLUMN,
             barmode="group",
-            color_discrete_map=ATTRITION_COLORS,
-            title=f"<b>Distribution of {feature_col} by Attrition</b>"
+            color_discrete_map=ATTRITION_COLORS
         )
-    fig.update_layout(
-        template="plotly_white",
-        font=dict(family="Inter, sans-serif"),
-        height=400,
-        margin=dict(l=20, r=20, t=50, b=20),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-    )
+    apply_enterprise_theme(fig, f"Feature Distribution: {feature_col} by Attrition", height=380)
     return fig
