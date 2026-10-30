@@ -5,8 +5,6 @@
 
 🔗 **[Live Streamlit App](https://share.streamlit.io/deploy?repository=princedenthi/Employee-Attrition-Prediction&branch=main&mainModule=app.py)** &nbsp;|&nbsp; 📓 **[Jupyter Notebook](https://github.com/princedenthi/Employee-Attrition-Prediction/blob/main/notebooks/eda_and_model_training.ipynb)**
 
-> An end-to-end Machine Learning, Exploratory Data Analysis, and Decision-Support System designed to forecast voluntary employee turnover, diagnose organizational friction, and prescribe targeted retention strategies.
-
 ---
 
 ## 📌 Executive Summary
