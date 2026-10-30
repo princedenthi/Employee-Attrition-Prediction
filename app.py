@@ -9,6 +9,7 @@ strategic retention recommendations.
 
 import os
 import sys
+import textwrap
 from typing import Dict, Any
 import numpy as np
 import pandas as pd
@@ -49,6 +50,18 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Helper for rendering raw HTML without triggering CommonMark code-block parsing
+def render_html(html_str: str):
+    """
+    Renders HTML cleanly using st.html (or dedented markdown as fallback),
+    guaranteeing that 4-space markdown code-block triggers never occur.
+    """
+    clean_html = textwrap.dedent(html_str).strip()
+    if hasattr(st, "html"):
+        st.html(clean_html)
+    else:
+        st.markdown(clean_html, unsafe_allow_html=True)
+
 # Safe Plotly / Dataframe wrapper to avoid deprecation warnings across Streamlit versions
 def render_plotly(fig, **kwargs):
     """Safely renders Plotly chart with responsive width."""
@@ -67,127 +80,13 @@ def render_dataframe(df, **kwargs):
 # Custom Styling Injection
 def inject_custom_css():
     css_path = os.path.join(os.path.dirname(__file__), 'assets', 'style.css')
-    custom_css = ""
+    css_content = ""
     if os.path.exists(css_path):
         with open(css_path, 'r', encoding='utf-8') as f:
-            custom_css = f"<style>{f.read()}</style>"
-    
-    inline_css = """
-    <style>
-    /* Global Adjustments */
-    .block-container {
-        padding-top: 1.5rem;
-        padding-bottom: 2.5rem;
-    }
-    .stApp {
-        background-color: #F8FAFC;
-    }
-    /* Brand Header */
-    .brand-header {
-        background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%);
-        color: white;
-        padding: 24px 30px;
-        border-radius: 12px;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    .brand-header h1 {
-        color: #FFFFFF !important;
-        font-weight: 700;
-        font-size: 2.1rem;
-        margin: 0;
-        padding: 0;
-    }
-    .brand-header p {
-        color: #93C5FD;
-        margin: 6px 0 0 0;
-        font-size: 1rem;
-    }
-    /* KPI Metric Cards */
-    .kpi-container {
-        display: flex;
-        gap: 16px;
-        flex-wrap: wrap;
-        margin-bottom: 20px;
-    }
-    .kpi-card {
-        background: white;
-        border-radius: 10px;
-        padding: 16px 20px;
-        border: 1px solid #E2E8F0;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        flex: 1;
-        min-width: 200px;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .kpi-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.08);
-    }
-    .kpi-label {
-        font-size: 0.8rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #64748B;
-    }
-    .kpi-val {
-        font-size: 1.9rem;
-        font-weight: 700;
-        color: #0F172A;
-        margin: 4px 0;
-    }
-    .kpi-sub {
-        font-size: 0.78rem;
-        color: #94A3B8;
-    }
-    /* Section Headers */
-    .section-title {
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #0F172A;
-        border-bottom: 2px solid #E2E8F0;
-        padding-bottom: 8px;
-        margin: 24px 0 16px 0;
-    }
-    /* Badges */
-    .badge-low {
-        background-color: #DEF7EC;
-        color: #03543F;
-        padding: 4px 12px;
-        border-radius: 9999px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        display: inline-block;
-    }
-    .badge-med {
-        background-color: #FEF3C7;
-        color: #92400E;
-        padding: 4px 12px;
-        border-radius: 9999px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        display: inline-block;
-    }
-    .badge-high {
-        background-color: #FDE8E8;
-        color: #9B1C1C;
-        padding: 4px 12px;
-        border-radius: 9999px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        display: inline-block;
-    }
-    .callout-box {
-        border-left: 4px solid #1E3A8A;
-        background-color: #F8FAFC;
-        padding: 16px 20px;
-        border-radius: 0 8px 8px 0;
-        margin: 12px 0;
-    }
-    </style>
-    """
-    st.markdown(custom_css + inline_css, unsafe_allow_html=True)
+            css_content = f.read().strip()
+            
+    if css_content:
+        render_html(f"<style>{css_content}</style>")
 
 inject_custom_css()
 
@@ -260,12 +159,12 @@ with st.sidebar:
 # Page 1: Home Dashboard
 # ---------------------------------------------------------
 if page == "🏠 Home Dashboard":
-    st.markdown("""
+    render_html("""
     <div class="brand-header">
         <h1>WorkforceIQ Executive Dashboard</h1>
         <p>Strategic HR Intelligence, Attrition Risk Diagnostics & Machine Learning Forecasting</p>
     </div>
-    """, unsafe_allow_html=True)
+    """)
     
     df = get_cached_dataset()
     metrics = get_eda_summary_metrics(df)
@@ -273,37 +172,37 @@ if page == "🏠 Home Dashboard":
     # Headline KPI Cards
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.markdown(f"""
+        render_html(f"""
         <div class="kpi-card">
             <div class="kpi-label">Total Headcount</div>
             <div class="kpi-val">{metrics['total_employees']:,}</div>
             <div class="kpi-sub">Active Enterprise Workforce</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with col2:
-        st.markdown(f"""
+        render_html(f"""
         <div class="kpi-card" style="border-left: 4px solid #EF4444;">
             <div class="kpi-label">Voluntary Attrition Rate</div>
             <div class="kpi-val" style="color: #DC2626;">{metrics['attrition_rate']}%</div>
             <div class="kpi-sub">{metrics['employees_left']} Departed / {metrics['employees_stayed']} Retained</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with col3:
-        st.markdown(f"""
+        render_html(f"""
         <div class="kpi-card">
             <div class="kpi-label">Median Monthly Income</div>
             <div class="kpi-val">${metrics['median_monthly_income']:,.0f}</div>
             <div class="kpi-sub">Baseline Compensation</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with col4:
-        st.markdown(f"""
+        render_html(f"""
         <div class="kpi-card" style="border-left: 4px solid #F59E0B;">
             <div class="kpi-label">Overtime Exposure</div>
             <div class="kpi-val" style="color: #D97706;">{metrics['pct_overtime']}%</div>
             <div class="kpi-sub">Key Driver of Attrition</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     # Executive Overview Visuals
     c1, c2 = st.columns([1, 1])
@@ -313,7 +212,7 @@ if page == "🏠 Home Dashboard":
         render_plotly(create_attrition_by_department_chart(df))
 
     # Executive Summary & Critical Findings
-    st.markdown("<div class='section-title'>Executive Summary & Strategic Findings</div>", unsafe_allow_html=True)
+    render_html("<div class='section-title'>Executive Summary & Strategic Findings</div>")
     
     sc1, sc2, sc3 = st.columns(3)
     with sc1:
@@ -347,7 +246,7 @@ if page == "🏠 Home Dashboard":
 # Page 2: Exploratory Data Analysis
 # ---------------------------------------------------------
 elif page == "📊 Exploratory Data Analysis":
-    st.markdown("<div class='brand-header'><h1>Exploratory Data Analysis (EDA)</h1><p>Interactive multidimensional breakdown of employee demographics, compensation, and satisfaction.</p></div>", unsafe_allow_html=True)
+    render_html("<div class='brand-header'><h1>Exploratory Data Analysis (EDA)</h1><p>Interactive multidimensional breakdown of employee demographics, compensation, and satisfaction.</p></div>")
     
     df = get_cached_dataset()
     
@@ -410,7 +309,7 @@ elif page == "📊 Exploratory Data Analysis":
 # Page 3: Attrition Insights
 # ---------------------------------------------------------
 elif page == "💡 Attrition Insights":
-    st.markdown("<div class='brand-header'><h1>Workforce Attrition Root-Cause Insights</h1><p>Deep-dive forensic analytics on workplace friction points, overtime drag, and compensation ceilings.</p></div>", unsafe_allow_html=True)
+    render_html("<div class='brand-header'><h1>Workforce Attrition Root-Cause Insights</h1><p>Deep-dive forensic analytics on workplace friction points, overtime drag, and compensation ceilings.</p></div>")
     
     df = get_cached_dataset()
     
@@ -445,7 +344,7 @@ elif page == "💡 Attrition Insights":
 # Page 4: Model Performance
 # ---------------------------------------------------------
 elif page == "⚙️ Model Performance":
-    st.markdown("<div class='brand-header'><h1>Machine Learning Model Benchmarking</h1><p>Comprehensive evaluation of four classification algorithms with class-weight handling and hyperparameter tuning.</p></div>", unsafe_allow_html=True)
+    render_html("<div class='brand-header'><h1>Machine Learning Model Benchmarking</h1><p>Comprehensive evaluation of four classification algorithms with class-weight handling and hyperparameter tuning.</p></div>")
     
     comp_data = get_cached_model_comparison()
     
@@ -568,12 +467,12 @@ elif page == "⚙️ Model Performance":
 # Page 5: Employee Attrition Prediction
 # ---------------------------------------------------------
 elif page == "🔮 Employee Attrition Prediction":
-    st.markdown("""
+    render_html("""
     <div class="brand-header">
         <h1>Individual Employee Attrition Risk Assessment</h1>
         <p>Interactive risk simulation tool powered by machine learning and explainable feature contributions.</p>
     </div>
-    """, unsafe_allow_html=True)
+    """)
     
     predictor = get_cached_predictor()
 
@@ -747,12 +646,12 @@ elif page == "🔮 Employee Attrition Prediction":
         
         result = predictor.predict(user_record)
         
-        st.markdown("<div class='section-title'>Assessment Outcome & Risk Analysis</div>", unsafe_allow_html=True)
+        render_html("<div class='section-title'>Assessment Outcome & Risk Analysis</div>")
         
         rcol1, rcol2 = st.columns([1, 1.2])
         
         with rcol1:
-            st.markdown(f"""
+            render_html(f"""
             <div class="kpi-card" style="border-left: 6px solid {result['risk_color']};">
                 <div class="kpi-label">Predicted Retention Outcome</div>
                 <div class="kpi-val" style="color: {result['risk_color']}; font-size: 2.2rem;">
@@ -765,7 +664,7 @@ elif page == "🔮 Employee Attrition Prediction":
                     {result['summary_statement']}
                 </p>
             </div>
-            """, unsafe_allow_html=True)
+            """)
             
             # Gauge chart
             fig_gauge = go.Figure(go.Indicator(
@@ -820,14 +719,14 @@ elif page == "🔮 Employee Attrition Prediction":
                 st.info("Feature contributions calculated.")
 
         # Tailored Action Plan
-        st.markdown("<div class='section-title'>Recommended HR Mitigation Strategies</div>", unsafe_allow_html=True)
+        render_html("<div class='section-title'>Recommended HR Mitigation Strategies</div>")
         for rec in result['recommendations']:
-            st.markdown(f"""
+            render_html(f"""
             <div class="callout-box">
                 <strong style="color: #1E3A8A;">[{rec['category']}] {rec['action']}</strong><br>
                 <span style="color: #334155; font-size: 0.92rem;">{rec['detail']}</span>
             </div>
-            """, unsafe_allow_html=True)
+            """)
 
         # Responsible AI Notice
         st.caption(f"🔒 **{result['disclaimer']}**")
@@ -837,12 +736,12 @@ elif page == "🔮 Employee Attrition Prediction":
 # Page 6: Business Recommendations
 # ---------------------------------------------------------
 elif page == "📋 Business Recommendations":
-    st.markdown("""
+    render_html("""
     <div class="brand-header">
         <h1>Executive Talent Retention Playbook</h1>
         <p>MBA-level strategic interventions and organizational policy reforms derived from empirical findings.</p>
     </div>
-    """, unsafe_allow_html=True)
+    """)
     
     st.markdown("### Strategic Retention Pillars")
     
@@ -914,7 +813,7 @@ elif page == "📋 Business Recommendations":
     saved_departures = int(departures_yr * (target_reduction / 100.0))
     net_savings = saved_departures * cost_per_departure
 
-    st.markdown(f"""
+    render_html(f"""
     <div style="display: flex; gap: 16px; margin-top: 14px;">
         <div class="kpi-card" style="border-left: 4px solid #EF4444; flex: 1;">
             <div class="kpi-label">Annual Turnover Cost</div>
@@ -927,7 +826,7 @@ elif page == "📋 Business Recommendations":
             <div class="kpi-sub">Preserving {saved_departures:,} high-performing employees annually</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     st.markdown("---")
     st.markdown("### Priority Implementation Matrix (Impact vs. Effort)")
@@ -946,12 +845,12 @@ elif page == "📋 Business Recommendations":
 # Page 7: About Project
 # ---------------------------------------------------------
 elif page == "ℹ️ About Project":
-    st.markdown("""
+    render_html("""
     <div class="brand-header">
         <h1>About the WorkforceIQ Project</h1>
         <p>A comprehensive Machine Learning & Business Intelligence solution for enterprise human resource retention.</p>
     </div>
-    """, unsafe_allow_html=True)
+    """)
     
     col1, col2 = st.columns([1.5, 1])
     
