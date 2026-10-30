@@ -3,8 +3,6 @@
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=princedenthi/Employee-Attrition-Prediction&branch=main&mainModule=app.py)
 [![Open in Jupyter Notebook](https://img.shields.io/badge/Open%20in-Jupyter%20Notebook-F37626?logo=jupyter&logoColor=white)](https://github.com/princedenthi/Employee-Attrition-Prediction/blob/main/notebooks/eda_and_model_training.ipynb)
 
-🔗 **[Live Streamlit App](https://share.streamlit.io/deploy?repository=princedenthi/Employee-Attrition-Prediction&branch=main&mainModule=app.py)** &nbsp;|&nbsp; 📓 **[Jupyter Notebook](https://github.com/princedenthi/Employee-Attrition-Prediction/blob/main/notebooks/eda_and_model_training.ipynb)**
-
 ---
 
 ## 📌 Executive Summary
