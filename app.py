@@ -103,17 +103,28 @@ def get_cached_dataset() -> pd.DataFrame:
 
 @st.cache_resource
 def get_cached_predictor() -> AttritionPredictor:
-    """Loads trained predictor model."""
-    return get_predictor()
+    """Loads trained predictor model with automatic fallback training if needed."""
+    try:
+        return get_predictor()
+    except Exception:
+        # Fallback for cloud deployments with differing pickle / scikit-learn versions
+        from train_model import train_and_evaluate_all
+        train_and_evaluate_all()
+        return get_predictor()
 
 
 @st.cache_data
 def get_cached_model_comparison() -> Dict[str, Any]:
-    """Loads model evaluation comparisons."""
+    """Loads model evaluation comparisons with fallback."""
     path = os.path.join(os.path.dirname(__file__), 'models', 'model_comparison.pkl')
     if os.path.exists(path):
-        return joblib.load(path)
-    return {}
+        try:
+            return joblib.load(path)
+        except Exception:
+            pass
+    from train_model import train_and_evaluate_all
+    _, comparison_payload = train_and_evaluate_all()
+    return comparison_payload
 
 
 # ---------------------------------------------------------

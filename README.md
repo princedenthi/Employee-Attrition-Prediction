@@ -2,6 +2,7 @@
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.63%2B-FF4B4B.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=princedenthi/Employee-Attrition-Prediction&branch=main&mainModule=app.py)
 [![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.9%2B-F7931E.svg?logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
 [![Plotly](https://img.shields.io/badge/Plotly-Interactive-3F4F75.svg?logo=plotly&logoColor=white)](https://plotly.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -120,6 +121,24 @@ Employee-Attrition-Prediction/
 └── assets/
     └── style.css                  # Modern corporate UI styling sheet
 ```
+
+---
+
+## ☁️ 1-Click Cloud Deployment (Streamlit Community Cloud)
+
+You can deploy and host this interactive dashboard for free on **Streamlit Community Cloud**:
+
+1. Click the button below (or go to [share.streamlit.io](https://share.streamlit.io/)):
+   
+   [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=princedenthi/Employee-Attrition-Prediction&branch=main&mainModule=app.py)
+
+2. Sign in with your GitHub account (`princedenthi`).
+3. Streamlit Cloud will pre-fill:
+   - **Repository**: `princedenthi/Employee-Attrition-Prediction`
+   - **Branch**: `main`
+   - **Main file path**: `app.py`
+4. Click **Deploy!**
+5. Within 1–2 minutes, your live web application will be accessible worldwide at a custom URL (e.g., `https://employee-attrition-prediction-princedenthi.streamlit.app`).
 
 ---
 
