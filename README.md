@@ -56,6 +56,18 @@ flowchart TD
 | **Satisfaction Impact** | **Low satisfaction (22.8%)** vs. **High satisfaction (11.3%)** | Work-life balance and job satisfaction degradation compound departure risk. |
 | **Commute Friction** | Distance > 15 miles doubles dissatisfaction | Hybrid/remote arrangements directly mitigate geographic turnover pressure. |
 
+### 📈 Exploratory Workforce Visualizations
+
+<p align="center">
+  <img src="assets/charts/attrition_overview.png" width="48%" alt="Attrition Overview" />
+  <img src="assets/charts/department_attrition.png" width="48%" alt="Department Attrition" />
+</p>
+
+<p align="center">
+  <img src="assets/charts/job_role_attrition.png" width="54%" alt="Job Role Attrition" />
+  <img src="assets/charts/overtime_impact.png" width="42%" alt="Overtime Impact" />
+</p>
+
 ---
 
 ## 🤖 Machine Learning Benchmarking & Results
@@ -74,6 +86,21 @@ Therefore, our model selection framework strictly prioritizes **Recall on the At
 | **Decision Tree Classifier** | 65.65% | 21.88% | 44.68% | 0.2937 | 0.6519 | Prone to overfitting on small split leaves. |
 
 > **Champion Model:** **Logistic Regression** (with `class_weight='balanced'` and L2 regularization) was selected as the champion production model. It identifies **72.34% of all exiting employees** on unseen data while maintaining a strong **0.7985 ROC-AUC**.
+
+### 🔬 Model Benchmarking Visualizations
+
+<p align="center">
+  <img src="assets/charts/model_benchmark.png" width="95%" alt="Model Comparison Benchmark" />
+</p>
+
+<p align="center">
+  <img src="assets/charts/roc_curves.png" width="50%" alt="ROC Curves" />
+  <img src="assets/charts/confusion_matrix.png" width="46%" alt="Confusion Matrix" />
+</p>
+
+<p align="center">
+  <img src="assets/charts/feature_importance.png" width="85%" alt="Feature Importance" />
+</p>
 
 ---
 
@@ -116,10 +143,20 @@ Employee-Attrition-Prediction/
 │   ├── data_preprocessing.py      # Ingestion, cleaning, splitting & transformers
 │   ├── eda.py                     # Plotly visualization and metric generators
 │   ├── train_model.py             # Hyperparameter tuning, CV & model training
-│   └── prediction.py              # Inference engine & explainability
+│   ├── prediction.py              # Inference engine & explainability
+│   └── export_charts.py           # High-resolution chart generator for README
 │
 └── assets/
-    └── style.css                  # Modern corporate UI styling sheet
+    ├── style.css                  # Modern corporate UI styling sheet
+    └── charts/                    # High-resolution exported visualizations
+        ├── attrition_overview.png
+        ├── department_attrition.png
+        ├── job_role_attrition.png
+        ├── overtime_impact.png
+        ├── model_benchmark.png
+        ├── roc_curves.png
+        ├── confusion_matrix.png
+        └── feature_importance.png
 ```
 
 ---
