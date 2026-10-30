@@ -1,0 +1,85 @@
+/* Custom Modern Corporate CSS for HR Analytics Dashboard */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Metric / KPI Card */
+.kpi-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 16px;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+.kpi-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748B;
+    margin-bottom: 6px;
+}
+
+.kpi-value {
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: #0F172A;
+    line-height: 1.1;
+    margin-bottom: 4px;
+}
+
+.kpi-subtitle {
+    font-size: 0.8rem;
+    color: #94A3B8;
+}
+
+/* Badges */
+.badge-low {
+    background-color: #DEF7EC;
+    color: #03543F;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-block;
+}
+
+.badge-med {
+    background-color: #FEF3C7;
+    color: #92400E;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-block;
+}
+
+.badge-high {
+    background-color: #FDE8E8;
+    color: #9B1C1C;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-block;
+}
+
+/* Callout container */
+.callout-box {
+    border-left: 4px solid #1E3A8A;
+    background-color: #F8FAFC;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+}
