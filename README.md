@@ -1,12 +1,9 @@
 # WorkforceIQ: Enterprise Employee Attrition Prediction & Talent Retention Intelligence
 
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.63%2B-FF4B4B.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=princedenthi/Employee-Attrition-Prediction&branch=main&mainModule=app.py)
-[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.9%2B-F7931E.svg?logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
-[![Plotly](https://img.shields.io/badge/Plotly-Interactive-3F4F75.svg?logo=plotly&logoColor=white)](https://plotly.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![GitHub Repository](https://img.shields.io/badge/GitHub-princedenthi%2FEmployee--Attrition--Prediction-181717.svg?logo=github)](https://github.com/princedenthi/Employee-Attrition-Prediction)
+[![Open in Jupyter Notebook](https://img.shields.io/badge/Open%20in-Jupyter%20Notebook-F37626?logo=jupyter&logoColor=white)](https://github.com/princedenthi/Employee-Attrition-Prediction/blob/main/notebooks/eda_and_model_training.ipynb)
+
+🔗 **[Live Streamlit App](https://share.streamlit.io/deploy?repository=princedenthi/Employee-Attrition-Prediction&branch=main&mainModule=app.py)** &nbsp;|&nbsp; 📓 **[Jupyter Notebook](https://github.com/princedenthi/Employee-Attrition-Prediction/blob/main/notebooks/eda_and_model_training.ipynb)**
 
 > An end-to-end Machine Learning, Exploratory Data Analysis, and Decision-Support System designed to forecast voluntary employee turnover, diagnose organizational friction, and prescribe targeted retention strategies.
 
