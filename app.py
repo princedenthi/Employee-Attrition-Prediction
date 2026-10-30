@@ -49,6 +49,21 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Safe Plotly / Dataframe wrapper to avoid deprecation warnings across Streamlit versions
+def render_plotly(fig, **kwargs):
+    """Safely renders Plotly chart with responsive width."""
+    try:
+        st.plotly_chart(fig, width="stretch", **kwargs)
+    except TypeError:
+        st.plotly_chart(fig, use_container_width=True, **kwargs)
+
+def render_dataframe(df, **kwargs):
+    """Safely renders dataframe with responsive width."""
+    try:
+        st.dataframe(df, width="stretch", **kwargs)
+    except TypeError:
+        st.dataframe(df, use_container_width=True, **kwargs)
+
 # Custom Styling Injection
 def inject_custom_css():
     css_path = os.path.join(os.path.dirname(__file__), 'assets', 'style.css')
@@ -103,6 +118,11 @@ def inject_custom_css():
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         flex: 1;
         min-width: 200px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.08);
     }
     .kpi-label {
         font-size: 0.8rem;
@@ -129,6 +149,41 @@ def inject_custom_css():
         border-bottom: 2px solid #E2E8F0;
         padding-bottom: 8px;
         margin: 24px 0 16px 0;
+    }
+    /* Badges */
+    .badge-low {
+        background-color: #DEF7EC;
+        color: #03543F;
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+    .badge-med {
+        background-color: #FEF3C7;
+        color: #92400E;
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+    .badge-high {
+        background-color: #FDE8E8;
+        color: #9B1C1C;
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+    .callout-box {
+        border-left: 4px solid #1E3A8A;
+        background-color: #F8FAFC;
+        padding: 16px 20px;
+        border-radius: 0 8px 8px 0;
+        margin: 12px 0;
     }
     </style>
     """
@@ -253,9 +308,9 @@ if page == "🏠 Home Dashboard":
     # Executive Overview Visuals
     c1, c2 = st.columns([1, 1])
     with c1:
-        st.plotly_chart(create_attrition_overview_chart(df), use_container_width=True)
+        render_plotly(create_attrition_overview_chart(df))
     with c2:
-        st.plotly_chart(create_attrition_by_department_chart(df), use_container_width=True)
+        render_plotly(create_attrition_by_department_chart(df))
 
     # Executive Summary & Critical Findings
     st.markdown("<div class='section-title'>Executive Summary & Strategic Findings</div>", unsafe_allow_html=True)
@@ -280,15 +335,11 @@ if page == "🏠 Home Dashboard":
     # Architecture Overview Callout
     with st.expander("🔍 View End-to-End System Architecture"):
         st.markdown("""
-        ```mermaid
-        flowchart LR
-            A[Kaggle IBM HR Dataset] --> B[Data Cleaning & Stratified Split]
-            B --> C[Preprocessing Pipeline: StandardScaler & OneHotEncoder]
-            C --> D[Multi-Model Training: Logistic, DecisionTree, RF, GradientBoost]
-            D --> E[F1 & Recall Evaluation Engine]
-            E --> F[Saved Production Pipeline Joblib]
-            F --> G[Interactive Streamlit Risk Predictor & Business Insights]
-        ```
+        - **Data Pipeline**: Ingestion of 1,470 employee records, dropping constant/ID columns, stratified 80/20 train-test split.
+        - **Preprocessing**: Scikit-Learn `ColumnTransformer` (StandardScaler for numerics, OneHotEncoder for categoricals) fit solely on train partition.
+        - **Modeling**: 4 Supervised Classifiers benchmarked (Logistic Regression, Decision Tree, Random Forest, Gradient Boosting) using 5-Fold Stratified Cross-Validation.
+        - **Evaluation**: Optimized specifically for minority positive-class Recall (72.34%) and F1-score (0.5000) to minimize costly false negatives.
+        - **Production Persistence**: Exported as portable Joblib pipelines for instantaneous real-time inference.
         """)
 
 
@@ -330,29 +381,29 @@ elif page == "📊 Exploratory Data Analysis":
     with tab1:
         col1, col2 = st.columns(2)
         with col1:
-            st.plotly_chart(create_attrition_by_age_chart(filtered_df), use_container_width=True)
+            render_plotly(create_attrition_by_age_chart(filtered_df))
         with col2:
-            st.plotly_chart(create_attrition_by_gender_chart(filtered_df), use_container_width=True)
+            render_plotly(create_attrition_by_gender_chart(filtered_df))
 
     with tab2:
         col1, col2 = st.columns(2)
         with col1:
-            st.plotly_chart(create_attrition_by_department_chart(filtered_df), use_container_width=True)
+            render_plotly(create_attrition_by_department_chart(filtered_df))
         with col2:
-            st.plotly_chart(create_attrition_by_job_role_chart(filtered_df), use_container_width=True)
+            render_plotly(create_attrition_by_job_role_chart(filtered_df))
 
     with tab3:
         col1, col2 = st.columns(2)
         with col1:
-            st.plotly_chart(create_attrition_by_income_chart(filtered_df), use_container_width=True)
+            render_plotly(create_attrition_by_income_chart(filtered_df))
         with col2:
-            st.plotly_chart(create_attrition_by_years_at_company_chart(filtered_df), use_container_width=True)
+            render_plotly(create_attrition_by_years_at_company_chart(filtered_df))
 
     with tab4:
         st.markdown("#### Select Any Feature to Analyze Its Relationship with Attrition")
         all_features = [c for c in filtered_df.columns if c != TARGET_COLUMN]
         selected_feat = st.selectbox("Select Feature Column", options=all_features, index=all_features.index('DistanceFromHome') if 'DistanceFromHome' in all_features else 0)
-        st.plotly_chart(create_feature_distribution_chart(filtered_df, selected_feat), use_container_width=True)
+        render_plotly(create_feature_distribution_chart(filtered_df, selected_feat))
 
 
 # ---------------------------------------------------------
@@ -366,11 +417,11 @@ elif page == "💡 Attrition Insights":
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("### 1. Overtime Burnout Correlation")
-        st.plotly_chart(create_attrition_by_overtime_chart(df), use_container_width=True)
+        render_plotly(create_attrition_by_overtime_chart(df))
         st.caption("Employees working overtime experience 30.5% attrition vs 10.4% for standard hours. Overtime is the primary operational friction point.")
     with col2:
         st.markdown("### 2. Workplace Satisfaction Erosion")
-        st.plotly_chart(create_attrition_by_satisfaction_chart(df), use_container_width=True)
+        render_plotly(create_attrition_by_satisfaction_chart(df))
         st.caption("Low job satisfaction (Score 1) records 22.8% attrition, dropping to 11.3% for high satisfaction (Score 4).")
 
     st.markdown("---")
@@ -378,16 +429,16 @@ elif page == "💡 Attrition Insights":
     col3, col4 = st.columns(2)
     with col3:
         st.markdown("### 3. Work-Life Balance Degradation")
-        st.plotly_chart(create_attrition_by_work_life_balance_chart(df), use_container_width=True)
+        render_plotly(create_attrition_by_work_life_balance_chart(df))
         st.caption("Employees reporting 'Bad' Work-Life Balance (Level 1) leave at 31.2%, proving that personal boundary disruption drives rapid turnover.")
     with col4:
         st.markdown("### 4. High-Attrition Job Roles")
-        st.plotly_chart(create_attrition_by_job_role_chart(df), use_container_width=True)
+        render_plotly(create_attrition_by_job_role_chart(df))
         st.caption("Sales Representatives (39.8%) and Laboratory Technicians (23.9%) require urgent intervention and restructured incentive packages.")
 
     st.markdown("---")
     st.markdown("### 5. Numerical Feature Correlation Matrix with Attrition")
-    st.plotly_chart(create_correlation_heatmap(df, top_n=14), use_container_width=True)
+    render_plotly(create_correlation_heatmap(df, top_n=14))
 
 
 # ---------------------------------------------------------
@@ -412,7 +463,7 @@ elif page == "⚙️ Model Performance":
     for col in ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC']:
         display_df[col] = display_df[col].apply(lambda v: f"{v * 100:.2f}%")
         
-    st.dataframe(display_df, use_container_width=True)
+    render_dataframe(display_df)
     
     st.info("""
     **Model Selection Methodology (Recall & F1 Prioritization):**  
@@ -434,7 +485,7 @@ elif page == "⚙️ Model Performance":
         title="<b>Algorithm Performance Comparison Across Metrics</b>"
     )
     fig_comp.update_layout(template="plotly_white", yaxis_range=[0, 1.0], height=420)
-    st.plotly_chart(fig_comp, use_container_width=True)
+    render_plotly(fig_comp)
 
     # ROC Curves & Confusion Matrices
     st.markdown("---")
@@ -472,15 +523,12 @@ elif page == "⚙️ Model Performance":
             margin=dict(l=20, r=20, t=30, b=20),
             legend=dict(orientation="h", yanchor="bottom", y=-0.25, xanchor="center", x=0.5)
         )
-        st.plotly_chart(fig_roc, use_container_width=True)
+        render_plotly(fig_roc)
 
     with col_cm:
         st.markdown("### Confusion Matrix Inspector")
         chosen_model = st.selectbox("Select Model to Inspect Confusion Matrix", options=list(comp_data['models_data'].keys()))
         cm = comp_data['models_data'][chosen_model]['confusion_matrix']
-        
-        cm_labels = [['True Negative (Retained)', 'False Positive (False Alarm)'],
-                     ['False Negative (Missed Exit)', 'True Positive (Detected Exit)']]
         
         fig_cm = px.imshow(
             cm,
@@ -491,7 +539,7 @@ elif page == "⚙️ Model Performance":
             title=f"<b>Confusion Matrix: {chosen_model}</b>"
         )
         fig_cm.update_layout(height=420, margin=dict(l=20, r=20, t=40, b=20))
-        st.plotly_chart(fig_cm, use_container_width=True)
+        render_plotly(fig_cm)
 
     # Feature Importance Ranking
     st.markdown("---")
@@ -513,7 +561,7 @@ elif page == "⚙️ Model Performance":
             title="<b>Top 15 Most Predictive Features in Champion Model</b>"
         )
         fig_feats.update_layout(template="plotly_white", height=450, margin=dict(l=20, r=20, t=40, b=20))
-        st.plotly_chart(fig_feats, use_container_width=True)
+        render_plotly(fig_feats)
 
 
 # ---------------------------------------------------------
@@ -534,11 +582,11 @@ elif page == "🔮 Employee Attrition Prediction":
     p_col1, p_col2, p_col3 = st.columns(3)
     
     preset_choice = None
-    if p_col1.button("🔴 High-Risk Sales Representative", use_container_width=True):
+    if p_col1.button("🔴 High-Risk Sales Representative"):
         preset_choice = 'high_risk'
-    if p_col2.button("🟡 Moderate-Risk Lab Technician", use_container_width=True):
+    if p_col2.button("🟡 Moderate-Risk Lab Technician"):
         preset_choice = 'med_risk'
-    if p_col3.button("🟢 Low-Risk Senior R&D Manager", use_container_width=True):
+    if p_col3.button("🟢 Low-Risk Senior R&D Manager"):
         preset_choice = 'low_risk'
 
     # Set default values based on preset choice
@@ -675,7 +723,7 @@ elif page == "🔮 Employee Attrition Prediction":
             input_years_promo = st.slider("Years Since Last Promotion", min_value=0, max_value=15, value=int(default_vals['YearsSinceLastPromotion']))
             input_total_years = st.slider("Total Working Years", min_value=0, max_value=40, value=int(default_vals['TotalWorkingYears']))
 
-        submitted = st.form_submit_button("⚡ Evaluate Employee Retention Risk", use_container_width=True)
+        submitted = st.form_submit_button("⚡ Evaluate Employee Retention Risk")
 
     # Prediction Assessment Execution
     if submitted or preset_choice is not None:
@@ -745,7 +793,7 @@ elif page == "🔮 Employee Attrition Prediction":
                 }
             ))
             fig_gauge.update_layout(height=260, margin=dict(l=20, r=20, t=30, b=20))
-            st.plotly_chart(fig_gauge, use_container_width=True)
+            render_plotly(fig_gauge)
 
         with rcol2:
             st.markdown("### Key Risk Drivers & Retention Anchors")
@@ -767,7 +815,7 @@ elif page == "🔮 Employee Attrition Prediction":
                     title="<b>Local Feature Impact on Attrition Decision</b>"
                 )
                 fig_c.update_layout(template="plotly_white", height=340, margin=dict(l=20, r=20, t=40, b=20))
-                st.plotly_chart(fig_c, use_container_width=True)
+                render_plotly(fig_c)
             else:
                 st.info("Feature contributions calculated.")
 
@@ -842,6 +890,46 @@ elif page == "📋 Business Recommendations":
         """)
 
     st.markdown("---")
+    
+    # Financial ROI & Turnover Cost Calculator
+    st.markdown("### 💰 Interactive Retention ROI & Cost-Savings Calculator")
+    st.caption("Estimate financial cost of voluntary turnover and projected organizational savings through targeted retention.")
+    
+    roi_c1, roi_c2, roi_c3 = st.columns(3)
+    with roi_c1:
+        sim_headcount = st.number_input("Enterprise Headcount", min_value=100, max_value=50000, value=1470, step=100)
+        sim_attrition = st.slider("Current Attrition Rate (%)", min_value=5.0, max_value=40.0, value=16.1, step=0.5)
+    with roi_c2:
+        sim_avg_salary = st.number_input("Average Annual Salary ($)", min_value=30000, max_value=250000, value=65000, step=5000)
+        sim_cost_mult = st.slider("Turnover Cost Multiplier (% of Salary)", min_value=50, max_value=200, value=125, step=10,
+                                  help="SHRM standard estimates cost of turnover between 100% and 150% of annual compensation.")
+    with roi_c3:
+        target_reduction = st.slider("Target Attrition Reduction (%)", min_value=10, max_value=50, value=25, step=5,
+                                    help="Expected percentage reduction in voluntary departures through WorkforceIQ interventions.")
+    
+    # Calculations
+    departures_yr = int(sim_headcount * (sim_attrition / 100.0))
+    cost_per_departure = sim_avg_salary * (sim_cost_mult / 100.0)
+    total_turnover_cost = departures_yr * cost_per_departure
+    saved_departures = int(departures_yr * (target_reduction / 100.0))
+    net_savings = saved_departures * cost_per_departure
+
+    st.markdown(f"""
+    <div style="display: flex; gap: 16px; margin-top: 14px;">
+        <div class="kpi-card" style="border-left: 4px solid #EF4444; flex: 1;">
+            <div class="kpi-label">Annual Turnover Cost</div>
+            <div class="kpi-val" style="color: #DC2626;">${total_turnover_cost:,.0f}</div>
+            <div class="kpi-sub">{departures_yr:,} annual departures @ ${cost_per_departure:,.0f} each</div>
+        </div>
+        <div class="kpi-card" style="border-left: 4px solid #10B981; flex: 1;">
+            <div class="kpi-label">Projected Annual Savings</div>
+            <div class="kpi-val" style="color: #059669;">${net_savings:,.0f}</div>
+            <div class="kpi-sub">Preserving {saved_departures:,} high-performing employees annually</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("---")
     st.markdown("### Priority Implementation Matrix (Impact vs. Effort)")
     
     matrix_data = [
@@ -851,7 +939,7 @@ elif page == "📋 Business Recommendations":
         {"Initiative": "Structured Stay Interviews (18-Month Mark)", "Impact": "Medium", "Effort": "Low", "Timeline": "Immediate", "Owner": "People Business Partners"},
         {"Initiative": "Dual-Ladder Technical Career Framework", "Impact": "High", "Effort": "High", "Timeline": "90 Days", "Owner": "HR & Engineering"}
     ]
-    st.table(pd.DataFrame(matrix_data))
+    render_dataframe(pd.DataFrame(matrix_data))
 
 
 # ---------------------------------------------------------
