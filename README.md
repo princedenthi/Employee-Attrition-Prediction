@@ -1,6 +1,6 @@
 # WorkforceIQ: Enterprise Employee Attrition Prediction & Talent Retention Intelligence
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=princedenthi/Employee-Attrition-Prediction&branch=main&mainModule=app.py)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://employee-attrition-prediction-ex32uogvkbvs9awfdqisp6.streamlit.app/)
 [![Open in Jupyter Notebook](https://img.shields.io/badge/Open%20in-Jupyter%20Notebook-F37626?logo=jupyter&logoColor=white)](https://github.com/princedenthi/Employee-Attrition-Prediction/blob/main/notebooks/eda_and_model_training.ipynb)
 
 ---
@@ -154,21 +154,13 @@ Employee-Attrition-Prediction/
 
 ---
 
-## ☁️ 1-Click Cloud Deployment (Streamlit Community Cloud)
+## ☁️ Live Cloud Application (Streamlit Community Cloud)
 
-You can deploy and host this interactive dashboard for free on **Streamlit Community Cloud**:
+The interactive dashboard is live and hosted worldwide on **Streamlit Community Cloud**:
 
-1. Click the button below (or go to [share.streamlit.io](https://share.streamlit.io/)):
-   
-   [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/deploy?repository=princedenthi/Employee-Attrition-Prediction&branch=main&mainModule=app.py)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://employee-attrition-prediction-ex32uogvkbvs9awfdqisp6.streamlit.app/)
 
-2. Sign in with your GitHub account (`princedenthi`).
-3. Streamlit Cloud will pre-fill:
-   - **Repository**: `princedenthi/Employee-Attrition-Prediction`
-   - **Branch**: `main`
-   - **Main file path**: `app.py`
-4. Click **Deploy!**
-5. Within 1–2 minutes, your live web application will be accessible worldwide at a custom URL (e.g., `https://employee-attrition-prediction-princedenthi.streamlit.app`).
+👉 **Live URL**: [https://employee-attrition-prediction-ex32uogvkbvs9awfdqisp6.streamlit.app/](https://employee-attrition-prediction-ex32uogvkbvs9awfdqisp6.streamlit.app/)
 
 ---
 

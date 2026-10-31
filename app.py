@@ -1024,6 +1024,7 @@ elif page == "ℹ️  About Project":
         - **Author**: Princeden Thi
         - **GitHub Username**: [`princedenthi`](https://github.com/princedenthi)
         - **Repository**: [Employee-Attrition-Prediction](https://github.com/princedenthi/Employee-Attrition-Prediction)
+        - **Live Cloud App**: [Streamlit Application](https://employee-attrition-prediction-ex32uogvkbvs9awfdqisp6.streamlit.app/)
         
         ### Dataset Background
         - **Source**: Kaggle IBM HR Analytics Employee Attrition & Performance Dataset
